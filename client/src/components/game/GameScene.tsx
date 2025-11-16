@@ -2,17 +2,8 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { KeyboardControls } from "@react-three/drei";
 import { Suspense, useState, useRef, useEffect } from "react";
 import * as THREE from "three";
-import { Car, Controls } from "./Car";
-import { Road } from "./Road";
-import { Camera } from "./Camera";
-import { Environment } from "./Environment";
-import { Obstacles } from "./Obstacles";
-import { Collectibles } from "./Collectibles";
-import { SponsorBanners } from "./SponsorBanners";
-import { NitroParticles, DustTrail, ExhaustSmoke, CollisionSparks } from "./ParticleEffects";
-import { BiomePropsScene } from "./BiomeProps";
-import { AtmosphericParticles } from "./AtmosphericParticles";
-import { StartControl } from "./StartControl";
+import { Controls } from "./Car";
+import { SceneContents } from "./SceneContents";
 import { useRally } from "@/lib/stores/useRally";
 import { useSettings } from "@/lib/stores/useSettings";
 import { useBiome } from "@/lib/stores/useBiome";
@@ -76,6 +67,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
     pause,
     resume,
     addCollectible,
+    finishLoading,
   } = useRally();
   const showPhotoMode = useSettings((state) => state.showPhotoMode);
   const updateBiomeDistance = useBiome((state) => state.updateDistance);
@@ -221,38 +213,21 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
           }}
           shadows={{ type: THREE.PCFSoftShadowMap }}
         >
-          <Suspense fallback={null}>
-            <Environment />
-            <StartControl />
-            <SponsorBanners />
-            <Road carPositionRef={carPositionRef} />
-            <BiomePropsScene carPositionRef={carPositionRef} />
-            <Car
+          <Suspense fallback={<ambientLight intensity={0.5} />}>
+            <SceneContents
               carPositionRef={carPositionRef}
               carSpeedRef={carSpeedRef}
               onCrash={gameOver}
+              onCollision={handleCollision}
+              onCollect={handleCollect}
               boostCounter={boostCounter}
               nitroActive={nitroActive}
-              puddleSlowdown={puddleSlowdownActive}
+              puddleSlowdownActive={puddleSlowdownActive}
+              collisionSparkPosition={collisionSparkPosition}
+              showCollisionSparks={showCollisionSparks}
+              cameraShakeIntensity={cameraShakeIntensity}
+              onReady={phase === "loading" ? finishLoading : undefined}
             />
-            <Obstacles
-              carPositionRef={carPositionRef}
-              carSpeedRef={carSpeedRef}
-              onCollision={handleCollision}
-            />
-            <Collectibles
-              carPositionRef={carPositionRef}
-              onCollect={handleCollect}
-            />
-            <NitroParticles
-              active={nitroActive}
-              carPositionRef={carPositionRef}
-            />
-            <DustTrail carPositionRef={carPositionRef} speedRef={carSpeedRef} />
-            <ExhaustSmoke carPositionRef={carPositionRef} speedRef={carSpeedRef} />
-            <CollisionSparks position={collisionSparkPosition} active={showCollisionSparks} />
-            <AtmosphericParticles carPositionRef={carPositionRef} />
-            <Camera carPositionRef={carPositionRef} shakeIntensity={cameraShakeIntensity} />
             <FrameSync
               carPositionRef={carPositionRef}
               carSpeedRef={carSpeedRef}
