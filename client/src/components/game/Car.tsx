@@ -68,6 +68,7 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
   
   const [, getKeys] = useKeyboardControls<Controls>();
   const phase = useRally((state) => state.phase);
+  const isCountingDown = useRally((state) => state.isCountingDown);
   const mobileControls = useMobileControls();
   const showPhotoMode = useSettings((state) => state.showPhotoMode);
   
@@ -94,10 +95,10 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
     if (!carRef.current || phase !== "playing" || showPhotoMode) return;
     
     const keys = getKeys();
-    const isForward = keys.forward || mobileControls.forward;
-    const isBack = keys.back || mobileControls.back;
-    const isLeft = keys.left || mobileControls.left;
-    const isRight = keys.right || mobileControls.right;
+    const isForward = !isCountingDown && (keys.forward || mobileControls.forward);
+    const isBack = !isCountingDown && (keys.back || mobileControls.back);
+    const isLeft = !isCountingDown && (keys.left || mobileControls.left);
+    const isRight = !isCountingDown && (keys.right || mobileControls.right);
     
     const maxSpeedMs = nitroActive ? GAME_CONFIG.MAX_SPEED_MS * 1.2 : GAME_CONFIG.MAX_SPEED_MS;
     const accelInput = isForward ? 1 : 0;

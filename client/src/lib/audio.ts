@@ -7,6 +7,8 @@ export class AudioManager {
   private shieldSound: HTMLAudioElement | null = null;
   private splashSound: HTMLAudioElement | null = null;
   private pickupSound: HTMLAudioElement | null = null;
+  private countdownBeep: HTMLAudioElement | null = null;
+  private countdownGo: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
   private enginePlaying: boolean = false;
   
@@ -29,6 +31,13 @@ export class AudioManager {
     
     this.successSound = new Audio("/sounds/success.mp3");
     this.successSound.volume = 0.5;
+    
+    this.countdownBeep = new Audio("/sounds/hit.mp3");
+    this.countdownBeep.volume = 0.7;
+    this.countdownBeep.playbackRate = 1.5;
+    
+    this.countdownGo = new Audio("/sounds/success.mp3");
+    this.countdownGo.volume = 0.8;
   }
   
   playBackgroundMusic() {
@@ -116,6 +125,23 @@ export class AudioManager {
       const clone = this.pickupSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.5;
       clone.play().catch(err => console.log("Pickup sound prevented:", err));
+    }
+  }
+  
+  playCountdownBeep() {
+    if (this.countdownBeep && !this.isMuted) {
+      const clone = this.countdownBeep.cloneNode() as HTMLAudioElement;
+      clone.volume = 0.7;
+      clone.playbackRate = 1.5;
+      clone.play().catch(err => console.log("Countdown beep prevented:", err));
+    }
+  }
+  
+  playCountdownGo() {
+    if (this.countdownGo && !this.isMuted) {
+      const clone = this.countdownGo.cloneNode() as HTMLAudioElement;
+      clone.volume = 0.8;
+      clone.play().catch(err => console.log("Countdown go prevented:", err));
     }
   }
   
