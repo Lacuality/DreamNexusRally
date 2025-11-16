@@ -28,26 +28,26 @@ export function StartControl() {
   }, [startArch, safetyBarrier, trafficCone, timingDisplay, controlTent, marshalClipboard, marshalRadio, spectators, serviceVan]);
 
   const laneWidth = 5;
-  const startZ = -5;
+  const startLineZ = 1;
 
   return (
     <group>
       <primitive 
         object={models.startArch} 
-        position={[0, 0, startZ]} 
+        position={[0, 0, startLineZ]} 
         scale={3.5}
       />
 
       <primitive 
         object={models.timingDisplay} 
-        position={[-laneWidth / 2 - 1.5, 0, startZ + 2]} 
+        position={[-laneWidth / 2 - 1.5, 0, startLineZ - 1]} 
         scale={1.2}
         rotation={[0, Math.PI / 4, 0]}
       />
       
       <primitive 
         object={models.timingDisplay.clone()} 
-        position={[laneWidth / 2 + 1.5, 0, startZ + 2]} 
+        position={[laneWidth / 2 + 1.5, 0, startLineZ - 1]} 
         scale={1.2}
         rotation={[0, -Math.PI / 4, 0]}
       />
@@ -58,7 +58,7 @@ export function StartControl() {
             <primitive
               key={`barrier-${side}-${i}`}
               object={models.safetyBarrier.clone()}
-              position={[side * (laneWidth / 2 + 0.8), 0, startZ + 3 - i * 1.5]}
+              position={[side * (laneWidth / 2 + 0.8), 0, startLineZ + 2 - i * 1.5]}
               scale={1.2}
               rotation={[0, side > 0 ? Math.PI / 2 : -Math.PI / 2, 0]}
             />
@@ -72,7 +72,7 @@ export function StartControl() {
             <primitive
               key={`cone-${side}-${i}`}
               object={models.trafficCone.clone()}
-              position={[side * (laneWidth / 2 + 0.3), 0, startZ + 4 - i * 1.2]}
+              position={[side * (laneWidth / 2 + 0.3), 0, startLineZ + 3 - i * 1.2]}
               scale={0.8}
             />
           ))}
@@ -81,59 +81,59 @@ export function StartControl() {
 
       <primitive 
         object={models.controlTent} 
-        position={[laneWidth / 2 + 3.5, 0, startZ + 1]} 
+        position={[laneWidth / 2 + 3.5, 0, startLineZ - 2]} 
         scale={2.0}
       />
 
-      <mesh position={[laneWidth / 2 + 3.5, 0.5, startZ + 1]} receiveShadow>
+      <mesh position={[laneWidth / 2 + 3.5, 0.5, startLineZ - 2]} receiveShadow>
         <boxGeometry args={[1.2, 0.8, 0.6]} />
         <meshStandardMaterial color="#8B4513" />
       </mesh>
 
-      <mesh position={[laneWidth / 2 + 4.2, 0.3, startZ + 0.5]} receiveShadow>
+      <mesh position={[laneWidth / 2 + 4.2, 0.3, startLineZ - 2.5]} receiveShadow>
         <boxGeometry args={[0.4, 0.5, 0.4]} />
         <meshStandardMaterial color="#654321" />
       </mesh>
-      <mesh position={[laneWidth / 2 + 4.2, 0.3, startZ + 1.5]} receiveShadow>
+      <mesh position={[laneWidth / 2 + 4.2, 0.3, startLineZ - 1.5]} receiveShadow>
         <boxGeometry args={[0.4, 0.5, 0.4]} />
         <meshStandardMaterial color="#654321" />
       </mesh>
 
       <primitive 
         object={models.marshalClipboard} 
-        position={[-laneWidth / 2 - 2, 0, startZ + 1]} 
+        position={[-laneWidth / 2 - 2, 0, startLineZ - 2]} 
         scale={1.5}
         rotation={[0, Math.PI / 4, 0]}
       />
 
       <primitive 
         object={models.marshalRadio} 
-        position={[laneWidth / 2 + 2.5, 0, startZ + 0.5]} 
+        position={[laneWidth / 2 + 2.5, 0, startLineZ - 2.5]} 
         scale={1.5}
         rotation={[0, -Math.PI / 3, 0]}
       />
 
       <primitive 
         object={models.spectators} 
-        position={[-laneWidth / 2 - 4, 0, startZ - 2]} 
+        position={[-laneWidth / 2 - 4, 0, startLineZ - 5]} 
         scale={1.3}
       />
 
       <primitive 
         object={models.spectators.clone()} 
-        position={[laneWidth / 2 + 5, 0, startZ - 3]} 
+        position={[laneWidth / 2 + 5, 0, startLineZ - 6]} 
         scale={1.3}
         rotation={[0, Math.PI, 0]}
       />
 
       <primitive 
         object={models.serviceVan} 
-        position={[-laneWidth / 2 - 6, 0, startZ - 8]} 
+        position={[-laneWidth / 2 - 6, 0, startLineZ - 11]} 
         scale={2.2}
         rotation={[0, Math.PI / 6, 0]}
       />
 
-      <mesh position={[0, 0.01, startZ + 3]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+      <mesh position={[0, 0.01, startLineZ]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[laneWidth, 0.3]} />
         <meshStandardMaterial color="#FFFFFF" />
       </mesh>
@@ -141,7 +141,7 @@ export function StartControl() {
       {[-2, -1, 0, 1, 2].map((offset) => (
         <mesh 
           key={`skid-${offset}`}
-          position={[offset * 0.6, 0.02, startZ + 4.5]} 
+          position={[offset * 0.6, 0.02, startLineZ - 1.5]} 
           rotation={[-Math.PI / 2, 0, 0.1]} 
           receiveShadow
         >
@@ -150,11 +150,11 @@ export function StartControl() {
         </mesh>
       ))}
 
-      <pointLight position={[-3, 5, startZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
-      <pointLight position={[3, 5, startZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
-      <pointLight position={[0, 4, startZ + 5]} intensity={150} distance={12} color="#FFEECC" />
+      <pointLight position={[-3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
+      <pointLight position={[3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
+      <pointLight position={[0, 4, startLineZ + 5]} intensity={150} distance={12} color="#FFEECC" />
       
-      <pointLight position={[laneWidth / 2 + 3.5, 3, startZ + 1]} intensity={80} distance={8} color="#FF6B6B" />
+      <pointLight position={[laneWidth / 2 + 3.5, 3, startLineZ - 2]} intensity={80} distance={8} color="#FF6B6B" />
     </group>
   );
 }
