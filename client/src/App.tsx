@@ -3,6 +3,7 @@ import { useRally } from "./lib/stores/useRally";
 import { TitleScreenImmersive } from "./components/ui/TitleScreenImmersive";
 import { GameScene } from "./components/game/GameScene";
 import { GameOverScreen } from "./components/ui/GameOverScreen";
+import { CountdownDisplay } from "./components/ui/CountdownDisplay";
 import { audioManager } from "./lib/audio";
 import { useFullscreen } from "./hooks/useFullscreen";
 import "@fontsource/inter";
@@ -36,6 +37,7 @@ function App() {
           <GameOverScreen />
         </>
       )}
+      <CountdownDisplay />
     </div>
   );
 }
