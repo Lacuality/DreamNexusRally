@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { audioManager } from "@/lib/audio";
 
-export type RallyPhase = "menu" | "playing" | "paused" | "gameover";
+export type RallyPhase = "menu" | "loading" | "playing" | "paused" | "gameover";
 
 interface RallyState {
   phase: RallyPhase;
@@ -31,6 +31,8 @@ interface RallyState {
   loadPlayerName: () => void;
   setCountdown: (count: number) => void;
   startCountdown: () => void;
+  startLoading: () => void;
+  finishLoading: () => void;
 }
 
 export const useRally = create<RallyState>()(
@@ -46,6 +48,29 @@ export const useRally = create<RallyState>()(
     scoreSubmitted: false,
     countdown: 3,
     isCountingDown: false,
+    
+    startLoading: () => {
+      audioManager.stopBackgroundMusic();
+      set({ 
+        phase: "loading",
+        distance: 0,
+        speed: 0,
+        currentScore: 0,
+        collectiblesCount: 0,
+        isCountingDown: false,
+        countdown: 3
+      });
+    },
+    
+    finishLoading: () => {
+      const now = Date.now();
+      set({ 
+        phase: "playing",
+        isCountingDown: true, 
+        countdown: 3,
+        startTime: now
+      });
+    },
     
     startCountdown: () => {
       const now = Date.now();
