@@ -12,6 +12,7 @@ import { SponsorBanners } from "./SponsorBanners";
 import { NitroParticles, DustTrail, ExhaustSmoke, CollisionSparks } from "./ParticleEffects";
 import { BiomePropsScene } from "./BiomeProps";
 import { AtmosphericParticles } from "./AtmosphericParticles";
+import { StartControl } from "./StartControl";
 import { useRally } from "@/lib/stores/useRally";
 import { useSettings } from "@/lib/stores/useSettings";
 import { useBiome } from "@/lib/stores/useBiome";
@@ -19,6 +20,7 @@ import { GameHUD } from "../ui/GameHUD";
 import { PauseMenu } from "../ui/PauseMenu";
 import { MobileControls } from "../ui/MobileControls";
 import { TuningPanel } from "../ui/TuningPanel";
+import { CountdownDisplay } from "../ui/CountdownDisplay";
 import { GAME_CONFIG } from "@/lib/constants";
 import { audioManager } from "@/lib/audio";
 
@@ -222,6 +224,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
         >
           <Suspense fallback={null}>
             <Environment />
+            <StartControl />
             <SponsorBanners />
             <Road carPositionRef={carPositionRef} />
             <BiomePropsScene carPositionRef={carPositionRef} />
@@ -270,6 +273,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
       {!showPhotoMode && phase === "playing" && <TuningPanel />}
       {!showPhotoMode && phase === "paused" && <PauseMenu />}
       {!showPhotoMode && <MobileControls />}
+      <CountdownDisplay />
 
       {showPhotoMode && (
         <div
