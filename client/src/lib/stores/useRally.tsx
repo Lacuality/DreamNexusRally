@@ -55,8 +55,10 @@ export const useRally = create<RallyState>()(
     setCountdown: (count: number) => {
       set({ countdown: count });
       if (count === 0) {
-        set({ isCountingDown: false });
-        get().start();
+        setTimeout(() => {
+          set({ isCountingDown: false });
+          get().start();
+        }, 1000);
       }
     },
     
