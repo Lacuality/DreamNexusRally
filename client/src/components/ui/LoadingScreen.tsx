@@ -1,66 +1,6 @@
-import { useEffect, useState } from "react";
-import { useGLTF } from "@react-three/drei";
-import { useRally } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 
-const modelPaths = [
-  "/models/start-arch.glb",
-  "/models/safety-barrier.glb",
-  "/models/traffic-cone.glb",
-  "/models/timing-display.glb",
-  "/models/control-tent.glb",
-  "/models/marshal-clipboard.glb",
-  "/models/marshal-radio.glb",
-  "/models/spectators.glb",
-  "/models/service-van.glb",
-];
-
 export function LoadingScreen() {
-  const [loadingProgress, setLoadingProgress] = useState(0);
-  const finishLoading = useRally((state) => state.finishLoading);
-
-  useEffect(() => {
-    let mounted = true;
-    let loadedCount = 0;
-
-    const preloadModels = async () => {
-      try {
-        const loadPromises = modelPaths.map((path, index) => {
-          const preloadPromise = useGLTF.preload(path);
-          if (preloadPromise) {
-            return preloadPromise.then(() => {
-              if (mounted) {
-                loadedCount++;
-                setLoadingProgress(Math.floor((loadedCount / modelPaths.length) * 100));
-              }
-            });
-          }
-          return Promise.resolve();
-        });
-
-        await Promise.all(loadPromises);
-
-        if (mounted) {
-          setTimeout(() => {
-            finishLoading();
-          }, 500);
-        }
-      } catch (error) {
-        console.error("Error loading models:", error);
-        if (mounted) {
-          setTimeout(() => {
-            finishLoading();
-          }, 1000);
-        }
-      }
-    };
-
-    preloadModels();
-
-    return () => {
-      mounted = false;
-    };
-  }, [finishLoading]);
 
   return (
     <div
@@ -105,24 +45,13 @@ export function LoadingScreen() {
         >
           <div
             style={{
-              width: `${loadingProgress}%`,
+              width: "100%",
               height: "100%",
               background: `linear-gradient(90deg, ${DREAM_NEXUS_COLORS.cyan}, ${DREAM_NEXUS_COLORS.white})`,
-              transition: "width 0.3s ease-out",
+              animation: "loadingBarPulse 1.5s ease-in-out infinite",
               boxShadow: `0 0 10px ${DREAM_NEXUS_COLORS.cyan}`,
             }}
           />
-        </div>
-
-        <div
-          style={{
-            fontSize: "clamp(18px, 3vw, 24px)",
-            color: DREAM_NEXUS_COLORS.white,
-            fontFamily: "monospace",
-            fontWeight: "600",
-          }}
-        >
-          {loadingProgress}%
         </div>
 
         <div
@@ -135,7 +64,7 @@ export function LoadingScreen() {
             animation: "loadingPulse 1.5s ease-in-out infinite",
           }}
         >
-          Preparing race infrastructure...
+          Loading models and preparing race infrastructure...
         </div>
       </div>
 
@@ -146,6 +75,16 @@ export function LoadingScreen() {
           }
           50% {
             opacity: 1;
+          }
+        }
+        @keyframes loadingBarPulse {
+          0%, 100% {
+            opacity: 0.6;
+            transform: scaleX(0.95);
+          }
+          50% {
+            opacity: 1;
+            transform: scaleX(1);
           }
         }
       `}</style>

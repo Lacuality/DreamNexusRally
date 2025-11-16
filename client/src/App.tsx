@@ -30,7 +30,12 @@ function App() {
   return (
     <div ref={elementRef} style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {phase === "menu" && <TitleScreenImmersive isFullscreen={isFullscreen} onToggleFullscreen={toggle} isFullscreenSupported={isSupported} />}
-      {phase === "loading" && <LoadingScreen />}
+      {phase === "loading" && (
+        <>
+          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
+          <LoadingScreen />
+        </>
+      )}
       {phase === "playing" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
       {phase === "paused" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
       {phase === "gameover" && (
