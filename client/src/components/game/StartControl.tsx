@@ -1,5 +1,6 @@
-import { useGLTF } from "@react-three/drei";
-import { useMemo } from "react";
+import { useGLTF, Text } from "@react-three/drei";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export function StartControl() {
@@ -12,6 +13,9 @@ export function StartControl() {
   const { scene: marshalRadio } = useGLTF("/models/marshal-radio.glb");
   const { scene: spectators } = useGLTF("/models/spectators.glb");
   const { scene: serviceVan } = useGLTF("/models/service-van.glb");
+  
+  const startSignRef = useRef<THREE.Mesh>(null);
+  const lightBeamRefs = useRef<THREE.Mesh[]>([]);
 
   const models = useMemo(() => {
     return {
@@ -29,6 +33,27 @@ export function StartControl() {
 
   const laneWidth = 5;
   const startLineZ = 1;
+  
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    
+    if (startSignRef.current) {
+      const material = startSignRef.current.material as THREE.MeshStandardMaterial;
+      if (material && 'emissiveIntensity' in material) {
+        material.emissiveIntensity = 0.8 + Math.sin(time * 3) * 0.2;
+      }
+    }
+    
+    lightBeamRefs.current.forEach((beam, index) => {
+      if (beam) {
+        const offset = index * 0.5;
+        const material = beam.material as THREE.MeshBasicMaterial;
+        if (material && 'opacity' in material) {
+          material.opacity = 0.3 + Math.sin(time * 2 + offset) * 0.15;
+        }
+      }
+    });
+  });
 
   return (
     <group>
@@ -155,6 +180,119 @@ export function StartControl() {
       <pointLight position={[0, 4, startLineZ + 5]} intensity={150} distance={12} color="#FFEECC" />
       
       <pointLight position={[laneWidth / 2 + 3.5, 3, startLineZ - 2]} intensity={80} distance={8} color="#FF6B6B" />
+      
+      <Text
+        ref={startSignRef}
+        position={[0, 4.5, startLineZ + 0.2]}
+        fontSize={0.8}
+        color="#00FF41"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.05}
+        outlineColor="#003311"
+        font="/fonts/inter-bold.woff"
+      >
+        START
+        <meshStandardMaterial 
+          color="#00FF41" 
+          emissive="#00FF41" 
+          emissiveIntensity={1.0}
+          toneMapped={false}
+        />
+      </Text>
+      
+      {[-2, 2].map((xOffset, idx) => (
+        <mesh
+          key={`light-beam-${idx}`}
+          ref={(el) => { if (el) lightBeamRefs.current[idx] = el; }}
+          position={[xOffset, 2.5, startLineZ]}
+          rotation={[0, 0, 0]}
+        >
+          <cylinderGeometry args={[0.4, 0.6, 5, 8, 1, true]} />
+          <meshBasicMaterial 
+            color="#00FF41" 
+            transparent 
+            opacity={0.3}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      ))}
+      
+      <spotLight 
+        position={[-2, 0.5, startLineZ]} 
+        angle={0.3}
+        penumbra={0.5}
+        intensity={100}
+        distance={10}
+        target-position={[-2, 10, startLineZ]}
+        color="#00FF41"
+      />
+      <spotLight 
+        position={[2, 0.5, startLineZ]} 
+        angle={0.3}
+        penumbra={0.5}
+        intensity={100}
+        distance={10}
+        target-position={[2, 10, startLineZ]}
+        color="#00FF41"
+      />
+      
+      <GroundFog startLineZ={startLineZ} laneWidth={laneWidth} />
+    </group>
+  );
+}
+
+function GroundFog({ startLineZ, laneWidth }: { startLineZ: number; laneWidth: number }) {
+  const fogParticles = useMemo(() => {
+    const particles = [];
+    for (let i = 0; i < 30; i++) {
+      particles.push({
+        x: (Math.random() - 0.5) * (laneWidth + 4),
+        y: 0.1 + Math.random() * 0.3,
+        z: startLineZ - 3 + Math.random() * 8,
+        scale: 0.5 + Math.random() * 1.0,
+        speed: 0.1 + Math.random() * 0.2,
+      });
+    }
+    return particles;
+  }, [laneWidth, startLineZ]);
+  
+  const particleRefs = useRef<THREE.Mesh[]>([]);
+  
+  useFrame((state) => {
+    const time = state.clock.getElapsedTime();
+    particleRefs.current.forEach((particle, index) => {
+      if (particle) {
+        const data = fogParticles[index];
+        particle.position.y = data.y + Math.sin(time * data.speed + index) * 0.1;
+        const material = particle.material as THREE.MeshBasicMaterial;
+        if (material && 'opacity' in material) {
+          material.opacity = 0.15 + Math.sin(time * 0.5 + index * 0.3) * 0.05;
+        }
+      }
+    });
+  });
+  
+  return (
+    <group>
+      {fogParticles.map((particle, index) => (
+        <mesh
+          key={`fog-${index}`}
+          ref={(el) => { if (el) particleRefs.current[index] = el; }}
+          position={[particle.x, particle.y, particle.z]}
+          rotation={[-Math.PI / 2, 0, Math.random() * Math.PI]}
+        >
+          <planeGeometry args={[particle.scale * 2, particle.scale * 2]} />
+          <meshBasicMaterial 
+            color="#FFFFFF" 
+            transparent 
+            opacity={0.15}
+            blending={THREE.AdditiveBlending}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
     </group>
   );
 }

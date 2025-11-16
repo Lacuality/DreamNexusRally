@@ -48,8 +48,18 @@ export const useRally = create<RallyState>()(
     isCountingDown: false,
     
     startCountdown: () => {
+      const now = Date.now();
       audioManager.stopBackgroundMusic();
-      set({ isCountingDown: true, countdown: 3 });
+      set({ 
+        phase: "playing",
+        isCountingDown: true, 
+        countdown: 3,
+        distance: 0,
+        speed: 0,
+        currentScore: 0,
+        collectiblesCount: 0,
+        startTime: now
+      });
     },
     
     setCountdown: (count: number) => {
