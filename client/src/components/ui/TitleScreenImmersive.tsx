@@ -14,7 +14,7 @@ interface TitleScreenImmersiveProps {
 }
 
 export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFullscreenSupported }: TitleScreenImmersiveProps) {
-  const { start, highScore, loadHighScore, playerName, setPlayerName, loadPlayerName } = useRally();
+  const { startCountdown, highScore, loadHighScore, playerName, setPlayerName, loadPlayerName } = useRally();
   const [nameInput, setNameInput] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -64,7 +64,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
     const trimmed = nameInput.trim();
     if (trimmed) {
       setPlayerName(trimmed);
-      start();
+      startCountdown();
     }
   };
 

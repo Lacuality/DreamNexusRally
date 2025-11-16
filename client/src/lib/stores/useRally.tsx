@@ -14,6 +14,8 @@ interface RallyState {
   startTime: number;
   playerName: string;
   scoreSubmitted: boolean;
+  countdown: number;
+  isCountingDown: boolean;
   
   start: () => void;
   pause: () => void;
@@ -27,6 +29,8 @@ interface RallyState {
   saveHighScore: () => void;
   setPlayerName: (name: string) => void;
   loadPlayerName: () => void;
+  setCountdown: (count: number) => void;
+  startCountdown: () => void;
 }
 
 export const useRally = create<RallyState>()(
@@ -40,17 +44,32 @@ export const useRally = create<RallyState>()(
     startTime: 0,
     playerName: "",
     scoreSubmitted: false,
+    countdown: 3,
+    isCountingDown: false,
+    
+    startCountdown: () => {
+      audioManager.stopBackgroundMusic();
+      set({ isCountingDown: true, countdown: 3 });
+    },
+    
+    setCountdown: (count: number) => {
+      set({ countdown: count });
+      if (count === 0) {
+        set({ isCountingDown: false });
+        get().start();
+      }
+    },
     
     start: () => {
       const now = Date.now();
-      audioManager.stopBackgroundMusic();
       set({
         phase: "playing",
         distance: 0,
         speed: 0,
         currentScore: 0,
         collectiblesCount: 0,
-        startTime: now
+        startTime: now,
+        isCountingDown: false
       });
     },
     
