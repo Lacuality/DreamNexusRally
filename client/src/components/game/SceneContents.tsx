@@ -1,9 +1,5 @@
-import { useEffect, useRef, useState, Suspense } from "react";
-import * as THREE from "three";
+import { useEffect } from "react";
 import { Environment } from "./Environment";
-import { StartControlCore } from "./StartControlCore";
-import { StartControlDecor } from "./StartControlDecor";
-import { SponsorBanners } from "./SponsorBanners";
 import { Road } from "./Road";
 import { BiomePropsScene } from "./BiomeProps";
 import { Car } from "./Car";
@@ -13,6 +9,7 @@ import { NitroParticles, DustTrail, ExhaustSmoke, CollisionSparks } from "./Part
 import { AtmosphericParticles } from "./AtmosphericParticles";
 import { Camera } from "./Camera";
 import { useRally } from "@/lib/stores/useRally";
+import * as THREE from "three";
 
 interface Obstacle {
   id: number;
@@ -55,10 +52,9 @@ export function SceneContents({
 
   return (
     <>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1} />
-      
+      <Environment />
       <Road carPositionRef={carPositionRef} />
+      <BiomePropsScene carPositionRef={carPositionRef} />
       <Car
         carPositionRef={carPositionRef}
         carSpeedRef={carSpeedRef}
@@ -67,6 +63,23 @@ export function SceneContents({
         nitroActive={nitroActive}
         puddleSlowdown={puddleSlowdownActive}
       />
+      <Obstacles
+        carPositionRef={carPositionRef}
+        carSpeedRef={carSpeedRef}
+        onCollision={onCollision}
+      />
+      <Collectibles
+        carPositionRef={carPositionRef}
+        onCollect={onCollect}
+      />
+      <NitroParticles
+        active={nitroActive}
+        carPositionRef={carPositionRef}
+      />
+      <DustTrail carPositionRef={carPositionRef} speedRef={carSpeedRef} />
+      <ExhaustSmoke carPositionRef={carPositionRef} speedRef={carSpeedRef} />
+      <CollisionSparks position={collisionSparkPosition} active={showCollisionSparks} />
+      <AtmosphericParticles carPositionRef={carPositionRef} />
       <Camera carPositionRef={carPositionRef} shakeIntensity={cameraShakeIntensity} />
     </>
   );
