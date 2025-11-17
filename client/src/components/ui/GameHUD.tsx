@@ -66,7 +66,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
           gap: "10px",
         }}
       >
-        {isFullscreen && onToggleFullscreen && (
+        {onToggleFullscreen && (
           <button
             onClick={onToggleFullscreen}
             style={{
@@ -81,7 +81,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
               fontFamily: "monospace",
             }}
           >
-            {t.hud.exitFullscreen}
+            {isFullscreen ? t.hud.exitFullscreen : t.hud.enterFullscreen}
           </button>
         )}
         <button
