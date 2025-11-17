@@ -112,14 +112,14 @@ export function StartControlDecor() {
       <primitive 
         object={startGate} 
         position={[0, 0, startLineZ]} 
-        scale={2.5}
+        scale={5.0}
         rotation={[0, 0, 0]}
       />
 
       {spectatorsGeometry && spectatorsMaterial && (
         <Instances geometry={spectatorsGeometry} material={spectatorsMaterial}>
-          <Instance position={[-laneWidth / 2 - 4, 0, startLineZ - 5]} scale={1.3} />
-          <Instance position={[laneWidth / 2 + 5, 0, startLineZ - 6]} scale={1.3} rotation={[0, Math.PI, 0]} />
+          <Instance position={[-laneWidth / 2 - 3.5, 0, startLineZ + 1]} scale={1.8} />
+          <Instance position={[laneWidth / 2 + 4, 0, startLineZ + 0.5]} scale={1.8} rotation={[0, Math.PI, 0]} />
         </Instances>
       )}
 
