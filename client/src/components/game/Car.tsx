@@ -84,9 +84,11 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
 
   useEffect(() => {
     if (phase === "playing") {
-      audioManager.startEngineSound();
+      console.log("[Car] Phase is 'playing', calling updateEngineSound(0)");
+      audioManager.updateEngineSound(0);
     }
     return () => {
+      console.log("[Car] Cleanup: stopping engine sound");
       audioManager.stopEngineSound();
     };
   }, [phase]);

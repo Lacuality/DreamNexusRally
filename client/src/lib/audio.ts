@@ -1,5 +1,6 @@
 export class AudioManager {
   private bgMusic: HTMLAudioElement | null = null;
+  private idleSound: HTMLAudioElement | null = null;
   private engineSound: HTMLAudioElement | null = null;
   private crashSound: HTMLAudioElement | null = null;
   private successSound: HTMLAudioElement | null = null;
@@ -11,6 +12,7 @@ export class AudioManager {
   private countdownGo: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
   private enginePlaying: boolean = false;
+  private idlePlaying: boolean = false;
   
   constructor() {
     this.initAudio();
@@ -21,7 +23,11 @@ export class AudioManager {
     this.bgMusic.loop = true;
     this.bgMusic.volume = 0.3;
     
-    this.engineSound = new Audio("/sounds/hit.mp3");
+    this.idleSound = new Audio("/sounds/idle.mp3");
+    this.idleSound.loop = true;
+    this.idleSound.volume = 0.5;
+    
+    this.engineSound = new Audio("/sounds/acceleration.mp3");
     this.engineSound.loop = true;
     this.engineSound.volume = 0.4;
     this.engineSound.playbackRate = 0.8;
@@ -77,23 +83,63 @@ export class AudioManager {
   }
   
   stopEngineSound() {
-    if (!this.engineSound) return;
-    this.engineSound.pause();
-    this.engineSound.currentTime = 0;
-    this.enginePlaying = false;
+    if (this.engineSound) {
+      this.engineSound.pause();
+      this.engineSound.currentTime = 0;
+      this.enginePlaying = false;
+    }
+    if (this.idleSound) {
+      this.idleSound.pause();
+      this.idleSound.currentTime = 0;
+      this.idlePlaying = false;
+    }
   }
   
   updateEngineSound(speed: number) {
-    if (!this.engineSound || this.isMuted) return;
-    const maxSpeed = 180;
-    const minPitch = 0.8;
-    const maxPitch = 2.5;
-    const pitchRange = maxPitch - minPitch;
-    const speedRatio = Math.min(speed / maxSpeed, 1);
-    const pitchFactor = minPitch + speedRatio * pitchRange;
+    if (this.isMuted) return;
     
-    this.engineSound.playbackRate = pitchFactor;
-    this.engineSound.volume = 0.4 + speedRatio * 0.3;
+    const idleThreshold = 5;
+    console.log(`[Audio] updateEngineSound: speed=${speed.toFixed(1)}, idle=${this.idlePlaying}, accel=${this.enginePlaying}`);
+    
+    if (speed < idleThreshold) {
+      if (!this.idlePlaying && this.idleSound) {
+        console.log("[Audio] Starting idle sound");
+        this.idleSound.play().catch(err => console.log("Idle sound prevented:", err));
+        this.idlePlaying = true;
+      }
+      
+      if (this.enginePlaying && this.engineSound) {
+        console.log("[Audio] Stopping acceleration sound");
+        this.engineSound.pause();
+        this.engineSound.currentTime = 0;
+        this.enginePlaying = false;
+      }
+    } else {
+      if (this.idlePlaying && this.idleSound) {
+        console.log("[Audio] Stopping idle sound");
+        this.idleSound.pause();
+        this.idleSound.currentTime = 0;
+        this.idlePlaying = false;
+      }
+      
+      if (!this.enginePlaying && this.engineSound) {
+        console.log("[Audio] Starting acceleration sound");
+        this.engineSound.play().catch(err => console.log("Engine sound prevented:", err));
+        this.enginePlaying = true;
+      }
+      
+      if (this.engineSound) {
+        const maxSpeed = 180;
+        const minPitch = 0.8;
+        const maxPitch = 2.5;
+        const pitchRange = maxPitch - minPitch;
+        const speedRatio = Math.min(speed / maxSpeed, 1);
+        const pitchFactor = minPitch + speedRatio * pitchRange;
+        
+        this.engineSound.playbackRate = pitchFactor;
+        this.engineSound.volume = 0.4 + speedRatio * 0.3;
+      }
+    }
   }
   
   playNitro() {
@@ -150,10 +196,14 @@ export class AudioManager {
     if (this.isMuted) {
       if (this.bgMusic) this.bgMusic.pause();
       if (this.engineSound) this.engineSound.pause();
+      if (this.idleSound) this.idleSound.pause();
     } else {
       if (this.bgMusic) this.bgMusic.play().catch(err => console.log("Audio play prevented:", err));
       if (this.engineSound && this.enginePlaying) {
         this.engineSound.play().catch(err => console.log("Engine sound prevented:", err));
+      }
+      if (this.idleSound && this.idlePlaying) {
+        this.idleSound.play().catch(err => console.log("Idle sound prevented:", err));
       }
     }
     return this.isMuted;
@@ -163,6 +213,7 @@ export class AudioManager {
     this.stopBackgroundMusic();
     this.stopEngineSound();
     if (this.bgMusic) this.bgMusic.remove();
+    if (this.idleSound) this.idleSound.remove();
     if (this.engineSound) this.engineSound.remove();
     if (this.crashSound) this.crashSound.remove();
     if (this.successSound) this.successSound.remove();
