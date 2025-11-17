@@ -163,6 +163,7 @@ export class AudioManager {
   }
   
   playNitro() {
+    console.log("[Audio] Playing nitro sound");
     if (this.nitroSound && !this.isMuted) {
       const clone = this.nitroSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.6;
@@ -171,6 +172,7 @@ export class AudioManager {
   }
   
   playShield() {
+    console.log("[Audio] Playing shield sound");
     if (this.shieldSound && !this.isMuted) {
       const clone = this.shieldSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.5;
@@ -179,6 +181,7 @@ export class AudioManager {
   }
   
   playSplash() {
+    console.log("[Audio] Playing splash sound");
     if (this.splashSound && !this.isMuted) {
       const clone = this.splashSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.4;
@@ -187,6 +190,7 @@ export class AudioManager {
   }
   
   playPickup() {
+    console.log("[Audio] Playing pickup sound");
     if (this.pickupSound && !this.isMuted) {
       const clone = this.pickupSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.5;
@@ -195,6 +199,7 @@ export class AudioManager {
   }
   
   playBrake() {
+    console.log("[Audio] Playing brake sound");
     if (this.brakeSound && !this.isMuted) {
       const clone = this.brakeSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.3;
