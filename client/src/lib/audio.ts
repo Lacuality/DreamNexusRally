@@ -153,10 +153,10 @@ export class AudioManager {
         const pitchFactor = minPitch + speedRatio * pitchRange;
         
         this.engineSound.playbackRate = pitchFactor;
-        this.engineSound.volume = 0.4 + speedRatio * 0.35;
+        this.engineSound.volume = 0.25 + speedRatio * 0.25;
         
         if (speedRatio >= 0.95) {
-          this.engineSound.volume = 0.75 + Math.sin(Date.now() / 100) * 0.05;
+          this.engineSound.volume = 0.5 + Math.sin(Date.now() / 100) * 0.03;
         }
       }
     }
@@ -202,8 +202,8 @@ export class AudioManager {
     console.log("[Audio] Playing brake sound");
     if (this.brakeSound && !this.isMuted) {
       const clone = this.brakeSound.cloneNode() as HTMLAudioElement;
-      clone.volume = 0.3;
-      clone.playbackRate = 0.7;
+      clone.volume = 0.6;
+      clone.playbackRate = 1.0;
       clone.play().catch(err => console.log("Brake sound prevented:", err));
     }
   }
