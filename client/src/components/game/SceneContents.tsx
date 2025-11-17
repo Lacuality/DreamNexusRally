@@ -60,6 +60,14 @@ export function SceneContents({
   }, []);
 
   useEffect(() => {
+    if (onReady && readyCalledRef.current) {
+      console.log("onReady became defined again, resetting ready flag for new load cycle");
+      readyCalledRef.current = false;
+      frameCountRef.current = 0;
+    }
+  }, [onReady]);
+
+  useEffect(() => {
     if (phase === "playing" && !shouldLoadDecor) {
       console.log("Phase changed to playing, loading decorative assets");
       setShouldLoadDecor(true);
