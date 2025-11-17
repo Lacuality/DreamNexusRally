@@ -87,6 +87,12 @@ export const translations = {
       thanks: "Thanks for playing Dream Nexus Rally!"
     },
     
+    countdown: {
+      startingIn: "STARTING IN",
+      go: "GO!",
+      race: "▸▸▸ RACE! ◂◂◂"
+    },
+    
     leaderboard: {
       title: "🏆 Top 10 Leaderboard",
       loading: "Loading leaderboard...",
@@ -193,6 +199,12 @@ export const translations = {
       distanceTraveled: "Distancia Recorrida",
       playAgain: "Jugar de Nuevo (Enter)",
       thanks: "¡Gracias por jugar Dream Nexus Rally!"
+    },
+    
+    countdown: {
+      startingIn: "INICIANDO EN",
+      go: "¡YA!",
+      race: "▸▸▸ ¡CARRERA! ◂◂◂"
     },
     
     leaderboard: {

@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import { useRally } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { audioManager } from "@/lib/audio";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function CountdownDisplay() {
   const { countdown, isCountingDown, setCountdown } = useRally();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isCountingDown) return;
@@ -54,7 +56,7 @@ export function CountdownDisplay() {
               fontFamily: "monospace",
             }}
           >
-            STARTING IN
+            {t.countdown.startingIn}
           </div>
         )}
         
@@ -77,7 +79,7 @@ export function CountdownDisplay() {
             WebkitTextStroke: isGo ? "3px #003311" : "2px #660000",
           }}
         >
-          {isGo ? "GO!" : countdown}
+          {isGo ? t.countdown.go : countdown}
         </div>
 
         {isGo && (
@@ -96,7 +98,7 @@ export function CountdownDisplay() {
               fontFamily: "monospace",
             }}
           >
-            ▸▸▸ RACE! ◂◂◂
+            {t.countdown.race}
           </div>
         )}
       </div>
