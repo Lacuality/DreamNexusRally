@@ -47,7 +47,6 @@ export function SceneContents({
   showCollisionSparks,
   cameraShakeIntensity,
 }: SceneContentsProps) {
-  const boxRef = useRef<THREE.Mesh>(null);
   const phase = useRally((state) => state.phase);
 
   useEffect(() => {
@@ -59,15 +58,16 @@ export function SceneContents({
       <ambientLight intensity={0.5} />
       <directionalLight position={[10, 10, 5]} intensity={1} />
       
-      <mesh ref={boxRef} position={[0, 2, 5]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="hotpink" />
-      </mesh>
-
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial color="#333333" />
-      </mesh>
+      <Road carPositionRef={carPositionRef} />
+      <Car
+        carPositionRef={carPositionRef}
+        carSpeedRef={carSpeedRef}
+        onCrash={onCrash}
+        boostCounter={boostCounter}
+        nitroActive={nitroActive}
+        puddleSlowdown={puddleSlowdownActive}
+      />
+      <Camera carPositionRef={carPositionRef} shakeIntensity={cameraShakeIntensity} />
     </>
   );
 }
