@@ -9,7 +9,7 @@ export function StartControlDecor() {
   const { scene: safetyBarrier } = useGLTF("/models/safety-barrier.glb");
   const { scene: trafficCone } = useGLTF("/models/traffic-cone.glb");
   const { scene: spectators } = useGLTF("/models/spectators.glb");
-  const { scene: startGate } = useGLTF("/start gate_1763381139328.glb");
+  const { scene: startGate } = useGLTF("/models/start-gate.glb");
 
   const laneWidth = 5;
   const startLineZ = 1;
