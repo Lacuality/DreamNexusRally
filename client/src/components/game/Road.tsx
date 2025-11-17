@@ -1,5 +1,5 @@
 // client/src/components/game/Road.tsx
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -61,10 +61,14 @@ export function Road({ carPositionRef }: RoadProps) {
   const asphaltTexture = useTexture("/textures/asphalt.png");
   const scrollOffset = useRef(0);
 
-  useMemo(() => {
-    asphaltTexture.wrapS = asphaltTexture.wrapT = THREE.RepeatWrapping;
-    asphaltTexture.repeat.set(4, ROAD_LENGTH / 8);
-    asphaltTexture.anisotropy = 8;
+  useEffect(() => {
+    console.log("[Road] Asphalt texture loaded, configuring...");
+    if (asphaltTexture) {
+      asphaltTexture.wrapS = asphaltTexture.wrapT = THREE.RepeatWrapping;
+      asphaltTexture.repeat.set(4, ROAD_LENGTH / 8);
+      asphaltTexture.anisotropy = 8;
+      console.log("[Road] Texture configured successfully");
+    }
   }, [asphaltTexture]);
 
   // road surface
