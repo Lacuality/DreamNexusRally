@@ -183,7 +183,7 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
     carSpeedRef.current = speedKmh;
     carPositionRef.current.copy(carRef.current.position);
     
-    audioManager.updateEngineSound(speedKmh);
+    audioManager.updateEngineSound(speedKmh, brakeInput > 0);
   });
   
   return (
