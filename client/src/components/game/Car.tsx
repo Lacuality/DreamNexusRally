@@ -106,7 +106,7 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
     const brakeInput = isBack ? 1 : 0;
     const steerInput = (isLeft ? 1 : 0) + (isRight ? -1 : 0);
     
-    if (brakeInput > 0 && actualSpeedRef.current * 3.6 > 20 && state.clock.elapsedTime - lastBrakeSoundTimeRef.current > 0.3) {
+    if (brakeInput > 0 && actualSpeedRef.current * 3.6 > 15 && state.clock.elapsedTime - lastBrakeSoundTimeRef.current > 0.2) {
       audioManager.playBrake();
       lastBrakeSoundTimeRef.current = state.clock.elapsedTime;
     }
