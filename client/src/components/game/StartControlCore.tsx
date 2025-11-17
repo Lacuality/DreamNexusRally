@@ -1,11 +1,32 @@
 import { useGLTF, Text } from "@react-three/drei";
-import { useRef } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export function StartControlCore() {
+  console.log("[StartControlCore] Component mounting");
+  
   const { scene: startArch } = useGLTF("/models/start-arch.glb");
   const { scene: timingDisplay } = useGLTF("/models/timing-display.glb");
+  
+  useEffect(() => {
+    console.log("[StartControlCore] Models loaded - startArch:", !!startArch, "timingDisplay:", !!timingDisplay);
+  }, [startArch, timingDisplay]);
+  
+  const startArchClone = useMemo(() => {
+    console.log("[StartControlCore] Creating startArch clone");
+    return startArch.clone();
+  }, [startArch]);
+  
+  const timingDisplay1 = useMemo(() => {
+    console.log("[StartControlCore] Creating timingDisplay clone 1");
+    return timingDisplay.clone();
+  }, [timingDisplay]);
+  
+  const timingDisplay2 = useMemo(() => {
+    console.log("[StartControlCore] Creating timingDisplay clone 2");
+    return timingDisplay.clone();
+  }, [timingDisplay]);
   
   const startSignRef = useRef<THREE.Mesh>(null);
   const lightBeamRefs = useRef<THREE.Mesh[]>([]);
@@ -37,20 +58,20 @@ export function StartControlCore() {
   return (
     <group>
       <primitive 
-        object={startArch.clone()} 
+        object={startArchClone} 
         position={[0, 0, startLineZ]} 
         scale={3.5}
       />
 
       <primitive 
-        object={timingDisplay.clone()} 
+        object={timingDisplay1} 
         position={[-laneWidth / 2 - 1.5, 0, startLineZ - 1]} 
         scale={1.2}
         rotation={[0, Math.PI / 4, 0]}
       />
       
       <primitive 
-        object={timingDisplay.clone()} 
+        object={timingDisplay2} 
         position={[laneWidth / 2 + 1.5, 0, startLineZ - 1]} 
         scale={1.2}
         rotation={[0, -Math.PI / 4, 0]}
