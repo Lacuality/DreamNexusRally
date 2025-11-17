@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, Suspense } from "react";
-import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Environment } from "./Environment";
 import { StartControlCore } from "./StartControlCore";
@@ -33,7 +32,6 @@ interface SceneContentsProps {
   collisionSparkPosition: THREE.Vector3;
   showCollisionSparks: boolean;
   cameraShakeIntensity: number;
-  onReady?: () => void;
 }
 
 export function SceneContents({
@@ -48,24 +46,13 @@ export function SceneContents({
   collisionSparkPosition,
   showCollisionSparks,
   cameraShakeIntensity,
-  onReady,
 }: SceneContentsProps) {
-  const readyCalledRef = useRef(false);
   const [shouldLoadDecor, setShouldLoadDecor] = useState(false);
   const phase = useRally((state) => state.phase);
-  const frameCountRef = useRef(0);
 
   useEffect(() => {
-    console.log("SceneContents mounted, phase:", phase, "onReady defined:", !!onReady);
+    console.log("SceneContents mounted, phase:", phase);
   }, []);
-
-  useEffect(() => {
-    if (onReady && readyCalledRef.current) {
-      console.log("onReady became defined again, resetting ready flag for new load cycle");
-      readyCalledRef.current = false;
-      frameCountRef.current = 0;
-    }
-  }, [onReady]);
 
   useEffect(() => {
     if (phase === "playing" && !shouldLoadDecor) {
@@ -73,17 +60,6 @@ export function SceneContents({
       setShouldLoadDecor(true);
     }
   }, [phase, shouldLoadDecor]);
-
-  useFrame(() => {
-    if (onReady && !readyCalledRef.current) {
-      frameCountRef.current++;
-      if (frameCountRef.current >= 3) {
-        readyCalledRef.current = true;
-        console.log("Render loop active, calling onReady() to trigger countdown");
-        onReady();
-      }
-    }
-  });
 
   return (
     <>
