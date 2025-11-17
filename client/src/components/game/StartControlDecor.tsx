@@ -1,4 +1,4 @@
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Instances, Instance } from "@react-three/drei";
 import { useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
@@ -14,6 +14,26 @@ export function StartControlDecor() {
 
   const laneWidth = 5;
   const startLineZ = 1;
+
+  const barrierGeometry = useMemo(() => {
+    const mesh = safetyBarrier.children[0] as THREE.Mesh;
+    return mesh?.geometry;
+  }, [safetyBarrier]);
+
+  const barrierMaterial = useMemo(() => {
+    const mesh = safetyBarrier.children[0] as THREE.Mesh;
+    return mesh?.material;
+  }, [safetyBarrier]);
+
+  const coneGeometry = useMemo(() => {
+    const mesh = trafficCone.children[0] as THREE.Mesh;
+    return mesh?.geometry;
+  }, [trafficCone]);
+
+  const coneMaterial = useMemo(() => {
+    const mesh = trafficCone.children[0] as THREE.Mesh;
+    return mesh?.material;
+  }, [trafficCone]);
 
   const fogParticles = useMemo(() => {
     const particles = [];
@@ -47,32 +67,38 @@ export function StartControlDecor() {
 
   return (
     <group>
-      {[-1, 1].map((side) => (
-        <group key={`barriers-${side}`}>
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <primitive
-              key={`barrier-${side}-${i}`}
-              object={safetyBarrier.clone()}
-              position={[side * (laneWidth / 2 + 0.8), 0, startLineZ + 2 - i * 1.5]}
-              scale={1.2}
-              rotation={[0, side > 0 ? Math.PI / 2 : -Math.PI / 2, 0]}
-            />
+      {barrierGeometry && barrierMaterial && (
+        <Instances geometry={barrierGeometry} material={barrierMaterial}>
+          {[-1, 1].map((side) => (
+            <group key={`barriers-${side}`}>
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <Instance
+                  key={`barrier-${side}-${i}`}
+                  position={[side * (laneWidth / 2 + 0.8), 0, startLineZ + 2 - i * 1.5]}
+                  scale={1.2}
+                  rotation={[0, side > 0 ? Math.PI / 2 : -Math.PI / 2, 0]}
+                />
+              ))}
+            </group>
           ))}
-        </group>
-      ))}
+        </Instances>
+      )}
 
-      {[-1, 1].map((side) => (
-        <group key={`cones-${side}`}>
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <primitive
-              key={`cone-${side}-${i}`}
-              object={trafficCone.clone()}
-              position={[side * (laneWidth / 2 + 0.3), 0, startLineZ + 3 - i * 1.2]}
-              scale={0.8}
-            />
+      {coneGeometry && coneMaterial && (
+        <Instances geometry={coneGeometry} material={coneMaterial}>
+          {[-1, 1].map((side) => (
+            <group key={`cones-${side}`}>
+              {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                <Instance
+                  key={`cone-${side}-${i}`}
+                  position={[side * (laneWidth / 2 + 0.3), 0, startLineZ + 3 - i * 1.2]}
+                  scale={0.8}
+                />
+              ))}
+            </group>
           ))}
-        </group>
-      ))}
+        </Instances>
+      )}
 
       <primitive 
         object={controlTent.clone()} 
