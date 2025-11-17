@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, Suspense } from "react";
 import * as THREE from "three";
 import { Environment } from "./Environment";
-import { StartControl } from "./StartControl";
+import { StartControlCore } from "./StartControlCore";
+import { StartControlDecor } from "./StartControlDecor";
 import { SponsorBanners } from "./SponsorBanners";
 import { Road } from "./Road";
 import { BiomePropsScene } from "./BiomeProps";
@@ -11,6 +12,7 @@ import { Collectibles } from "./Collectibles";
 import { NitroParticles, DustTrail, ExhaustSmoke, CollisionSparks } from "./ParticleEffects";
 import { AtmosphericParticles } from "./AtmosphericParticles";
 import { Camera } from "./Camera";
+import { useRally } from "@/lib/stores/useRally";
 
 interface Obstacle {
   id: number;
@@ -48,13 +50,15 @@ export function SceneContents({
   onReady,
 }: SceneContentsProps) {
   const readyCalledRef = useRef(false);
+  const phase = useRally((state) => state.phase);
+  const loadDecorativeAssets = phase === "playing";
 
   useEffect(() => {
     if (onReady && !readyCalledRef.current) {
       requestAnimationFrame(() => {
         if (!readyCalledRef.current) {
           readyCalledRef.current = true;
-          console.log("Scene assets loaded and rendered, triggering onReady");
+          console.log("Core assets loaded, triggering countdown");
           onReady();
         }
       });
@@ -64,7 +68,12 @@ export function SceneContents({
   return (
     <>
       <Environment />
-      <StartControl />
+      <StartControlCore />
+      {loadDecorativeAssets && (
+        <Suspense fallback={null}>
+          <StartControlDecor />
+        </Suspense>
+      )}
       <SponsorBanners />
       <Road carPositionRef={carPositionRef} />
       <BiomePropsScene carPositionRef={carPositionRef} />
