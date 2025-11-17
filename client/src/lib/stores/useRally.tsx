@@ -68,9 +68,12 @@ export const useRally = create<RallyState>()(
     
     finishLoading: () => {
       const tutorialShown = sessionStorage.getItem("tutorialShown");
+      console.log("[finishLoading] tutorialShown in sessionStorage:", tutorialShown);
       if (!tutorialShown) {
+        console.log("[finishLoading] First time - showing tutorial");
         set({ phase: "tutorial", tutorialReturnPhase: "loading" });
       } else {
+        console.log("[finishLoading] Tutorial already shown - starting game");
         const now = Date.now();
         set({ 
           phase: "playing",
