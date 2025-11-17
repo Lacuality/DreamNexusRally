@@ -1,6 +1,7 @@
 import { useRally } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n/useTranslation";
+import { useState, useEffect } from "react";
 
 interface GameHUDProps {
   nitroActive?: boolean;
@@ -12,6 +13,16 @@ interface GameHUDProps {
 export function GameHUD({ nitroActive = false, shieldActive = false, isFullscreen = false, onToggleFullscreen }: GameHUDProps = {}) {
   const { distance, speed, highScore, collectiblesCount, currentScore, pause } = useRally();
   const { t } = useTranslation();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
   
   return (
     <div
@@ -59,11 +70,12 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
       <div
         style={{
           position: "absolute",
-          top: "20px",
-          right: "20px",
+          top: isMobile ? "200px" : "20px",
+          right: isMobile ? "10px" : "20px",
           pointerEvents: "auto",
           display: "flex",
-          gap: "10px",
+          flexDirection: isMobile ? "column" : "row",
+          gap: "8px",
         }}
       >
         {onToggleFullscreen && (
@@ -74,14 +86,15 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
               color: DREAM_NEXUS_COLORS.navy,
               border: "none",
               borderRadius: "8px",
-              padding: "10px 20px",
-              fontSize: "16px",
+              padding: isMobile ? "10px 14px" : "10px 20px",
+              fontSize: isMobile ? "12px" : "16px",
               fontWeight: "bold",
               cursor: "pointer",
               fontFamily: "monospace",
+              whiteSpace: "nowrap",
             }}
           >
-            {isFullscreen ? t.hud.exitFullscreen : t.hud.enterFullscreen}
+            {isMobile ? (isFullscreen ? "⛉" : "⛶") : (isFullscreen ? t.hud.exitFullscreen : t.hud.enterFullscreen)}
           </button>
         )}
         <button
@@ -91,14 +104,15 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
             color: DREAM_NEXUS_COLORS.navy,
             border: "none",
             borderRadius: "8px",
-            padding: "10px 20px",
-            fontSize: "16px",
+            padding: isMobile ? "10px 14px" : "10px 20px",
+            fontSize: isMobile ? "12px" : "16px",
             fontWeight: "bold",
             cursor: "pointer",
             fontFamily: "monospace",
+            whiteSpace: "nowrap",
           }}
         >
-          {t.hud.pause}
+          {isMobile ? "⏸" : t.hud.pause}
         </button>
       </div>
       
