@@ -47,58 +47,27 @@ export function SceneContents({
   showCollisionSparks,
   cameraShakeIntensity,
 }: SceneContentsProps) {
-  const [shouldLoadDecor, setShouldLoadDecor] = useState(false);
+  const boxRef = useRef<THREE.Mesh>(null);
   const phase = useRally((state) => state.phase);
 
   useEffect(() => {
-    console.log("SceneContents mounted, phase:", phase);
-  }, []);
-
-  useEffect(() => {
-    if (phase === "playing" && !shouldLoadDecor) {
-      console.log("Phase changed to playing, loading decorative assets");
-      setShouldLoadDecor(true);
-    }
-  }, [phase, shouldLoadDecor]);
+    console.log("[SceneContents] MOUNTED! Phase:", phase);
+  }, [phase]);
 
   return (
     <>
-      <Environment />
-      <StartControlCore />
-      {shouldLoadDecor && (
-        <Suspense fallback={null}>
-          <StartControlDecor />
-        </Suspense>
-      )}
-      <SponsorBanners />
-      <Road carPositionRef={carPositionRef} />
-      <BiomePropsScene carPositionRef={carPositionRef} />
-      <Car
-        carPositionRef={carPositionRef}
-        carSpeedRef={carSpeedRef}
-        onCrash={onCrash}
-        boostCounter={boostCounter}
-        nitroActive={nitroActive}
-        puddleSlowdown={puddleSlowdownActive}
-      />
-      <Obstacles
-        carPositionRef={carPositionRef}
-        carSpeedRef={carSpeedRef}
-        onCollision={onCollision}
-      />
-      <Collectibles
-        carPositionRef={carPositionRef}
-        onCollect={onCollect}
-      />
-      <NitroParticles
-        active={nitroActive}
-        carPositionRef={carPositionRef}
-      />
-      <DustTrail carPositionRef={carPositionRef} speedRef={carSpeedRef} />
-      <ExhaustSmoke carPositionRef={carPositionRef} speedRef={carSpeedRef} />
-      <CollisionSparks position={collisionSparkPosition} active={showCollisionSparks} />
-      <AtmosphericParticles carPositionRef={carPositionRef} />
-      <Camera carPositionRef={carPositionRef} shakeIntensity={cameraShakeIntensity} />
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1} />
+      
+      <mesh ref={boxRef} position={[0, 2, 5]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="hotpink" />
+      </mesh>
+
+      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial color="#333333" />
+      </mesh>
     </>
   );
 }
