@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, Suspense } from "react";
+import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Environment } from "./Environment";
 import { StartControlCore } from "./StartControlCore";
@@ -52,25 +53,29 @@ export function SceneContents({
   const readyCalledRef = useRef(false);
   const [shouldLoadDecor, setShouldLoadDecor] = useState(false);
   const phase = useRally((state) => state.phase);
+  const frameCountRef = useRef(0);
+
+  useEffect(() => {
+    console.log("SceneContents mounted, phase:", phase, "onReady defined:", !!onReady);
+  }, []);
 
   useEffect(() => {
     if (phase === "playing" && !shouldLoadDecor) {
-      console.log("Countdown started, loading decorative assets");
+      console.log("Phase changed to playing, loading decorative assets");
       setShouldLoadDecor(true);
     }
   }, [phase, shouldLoadDecor]);
 
-  useEffect(() => {
+  useFrame(() => {
     if (onReady && !readyCalledRef.current) {
-      requestAnimationFrame(() => {
-        if (!readyCalledRef.current) {
-          readyCalledRef.current = true;
-          console.log("Core assets loaded, triggering countdown");
-          onReady();
-        }
-      });
+      frameCountRef.current++;
+      if (frameCountRef.current >= 3) {
+        readyCalledRef.current = true;
+        console.log("Render loop active, calling onReady() to trigger countdown");
+        onReady();
+      }
     }
-  }, [onReady]);
+  });
 
   return (
     <>
