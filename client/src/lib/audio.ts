@@ -116,7 +116,7 @@ export class AudioManager {
     }
   }
   
-  updateEngineSound(speed: number) {
+  updateEngineSound(speed: number, isBraking: boolean = false) {
     if (this.isMuted) return;
     
     const idleThreshold = 5;
@@ -153,11 +153,13 @@ export class AudioManager {
         const pitchFactor = minPitch + speedRatio * pitchRange;
         
         this.engineSound.playbackRate = pitchFactor;
-        this.engineSound.volume = 0.25 + speedRatio * 0.25;
+        let baseVolume = 0.25 + speedRatio * 0.25;
         
         if (speedRatio >= 0.95) {
-          this.engineSound.volume = 0.5 + Math.sin(Date.now() / 100) * 0.03;
+          baseVolume = 0.5 + Math.sin(Date.now() / 100) * 0.03;
         }
+        
+        this.engineSound.volume = isBraking ? baseVolume * 0.5 : baseVolume;
       }
     }
   }
