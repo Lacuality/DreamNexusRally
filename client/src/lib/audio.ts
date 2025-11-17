@@ -8,11 +8,13 @@ export class AudioManager {
   private shieldSound: HTMLAudioElement | null = null;
   private splashSound: HTMLAudioElement | null = null;
   private pickupSound: HTMLAudioElement | null = null;
+  private brakeSound: HTMLAudioElement | null = null;
   private countdownBeep: HTMLAudioElement | null = null;
   private countdownGo: HTMLAudioElement | null = null;
   private isMuted: boolean = false;
   private enginePlaying: boolean = false;
   private idlePlaying: boolean = false;
+  private lastSpeed: number = 0;
   
   constructor() {
     this.initAudio();
@@ -37,6 +39,25 @@ export class AudioManager {
     
     this.successSound = new Audio("/sounds/success.mp3");
     this.successSound.volume = 0.5;
+    
+    this.nitroSound = new Audio("/sounds/success.mp3");
+    this.nitroSound.volume = 0.6;
+    this.nitroSound.playbackRate = 1.3;
+    
+    this.shieldSound = new Audio("/sounds/success.mp3");
+    this.shieldSound.volume = 0.5;
+    this.shieldSound.playbackRate = 0.8;
+    
+    this.splashSound = new Audio("/sounds/hit.mp3");
+    this.splashSound.volume = 0.4;
+    this.splashSound.playbackRate = 1.2;
+    
+    this.pickupSound = new Audio("/sounds/success.mp3");
+    this.pickupSound.volume = 0.5;
+    
+    this.brakeSound = new Audio("/sounds/hit.mp3");
+    this.brakeSound.volume = 0.3;
+    this.brakeSound.playbackRate = 0.7;
     
     this.countdownBeep = new Audio("/sounds/hit.mp3");
     this.countdownBeep.volume = 0.7;
@@ -99,31 +120,26 @@ export class AudioManager {
     if (this.isMuted) return;
     
     const idleThreshold = 5;
-    console.log(`[Audio] updateEngineSound: speed=${speed.toFixed(1)}, idle=${this.idlePlaying}, accel=${this.enginePlaying}`);
     
     if (speed < idleThreshold) {
       if (!this.idlePlaying && this.idleSound) {
-        console.log("[Audio] Starting idle sound");
         this.idleSound.play().catch(err => console.log("Idle sound prevented:", err));
         this.idlePlaying = true;
       }
       
       if (this.enginePlaying && this.engineSound) {
-        console.log("[Audio] Stopping acceleration sound");
         this.engineSound.pause();
         this.engineSound.currentTime = 0;
         this.enginePlaying = false;
       }
     } else {
       if (this.idlePlaying && this.idleSound) {
-        console.log("[Audio] Stopping idle sound");
         this.idleSound.pause();
         this.idleSound.currentTime = 0;
         this.idlePlaying = false;
       }
       
       if (!this.enginePlaying && this.engineSound) {
-        console.log("[Audio] Starting acceleration sound");
         this.engineSound.play().catch(err => console.log("Engine sound prevented:", err));
         this.enginePlaying = true;
       }
@@ -131,13 +147,17 @@ export class AudioManager {
       if (this.engineSound) {
         const maxSpeed = 180;
         const minPitch = 0.8;
-        const maxPitch = 2.5;
+        const maxPitch = 2.8;
         const pitchRange = maxPitch - minPitch;
         const speedRatio = Math.min(speed / maxSpeed, 1);
         const pitchFactor = minPitch + speedRatio * pitchRange;
         
         this.engineSound.playbackRate = pitchFactor;
-        this.engineSound.volume = 0.4 + speedRatio * 0.3;
+        this.engineSound.volume = 0.4 + speedRatio * 0.35;
+        
+        if (speedRatio >= 0.95) {
+          this.engineSound.volume = 0.75 + Math.sin(Date.now() / 100) * 0.05;
+        }
       }
     }
   }
@@ -171,6 +191,15 @@ export class AudioManager {
       const clone = this.pickupSound.cloneNode() as HTMLAudioElement;
       clone.volume = 0.5;
       clone.play().catch(err => console.log("Pickup sound prevented:", err));
+    }
+  }
+  
+  playBrake() {
+    if (this.brakeSound && !this.isMuted) {
+      const clone = this.brakeSound.cloneNode() as HTMLAudioElement;
+      clone.volume = 0.3;
+      clone.playbackRate = 0.7;
+      clone.play().catch(err => console.log("Brake sound prevented:", err));
     }
   }
   

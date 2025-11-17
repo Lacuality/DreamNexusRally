@@ -65,6 +65,7 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
   const lastBoostCounterRef = useRef(0);
   const wheelRotationRef = useRef(0);
   const suspensionTimeRef = useRef(0);
+  const lastBrakeSoundTimeRef = useRef(0);
   
   const [, getKeys] = useKeyboardControls<Controls>();
   const phase = useRally((state) => state.phase);
@@ -84,11 +85,9 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
 
   useEffect(() => {
     if (phase === "playing") {
-      console.log("[Car] Phase is 'playing', calling updateEngineSound(0)");
       audioManager.updateEngineSound(0);
     }
     return () => {
-      console.log("[Car] Cleanup: stopping engine sound");
       audioManager.stopEngineSound();
     };
   }, [phase]);
@@ -106,6 +105,11 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
     const accelInput = isForward ? 1 : 0;
     const brakeInput = isBack ? 1 : 0;
     const steerInput = (isLeft ? 1 : 0) + (isRight ? -1 : 0);
+    
+    if (brakeInput > 0 && actualSpeedRef.current * 3.6 > 20 && state.clock.elapsedTime - lastBrakeSoundTimeRef.current > 0.3) {
+      audioManager.playBrake();
+      lastBrakeSoundTimeRef.current = state.clock.elapsedTime;
+    }
     
     targetSpeedRef.current += (accelInput * GAME_CONFIG.ACCEL_RATE - brakeInput * GAME_CONFIG.BRAKE_RATE) * delta;
     
