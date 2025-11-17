@@ -1,4 +1,4 @@
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import * as THREE from "three";
 import { Environment } from "./Environment";
 import { StartControlCore } from "./StartControlCore";
@@ -50,8 +50,15 @@ export function SceneContents({
   onReady,
 }: SceneContentsProps) {
   const readyCalledRef = useRef(false);
+  const [shouldLoadDecor, setShouldLoadDecor] = useState(false);
   const phase = useRally((state) => state.phase);
-  const loadDecorativeAssets = phase === "playing";
+
+  useEffect(() => {
+    if (phase === "playing" && !shouldLoadDecor) {
+      console.log("Countdown started, loading decorative assets");
+      setShouldLoadDecor(true);
+    }
+  }, [phase, shouldLoadDecor]);
 
   useEffect(() => {
     if (onReady && !readyCalledRef.current) {
@@ -69,7 +76,7 @@ export function SceneContents({
     <>
       <Environment />
       <StartControlCore />
-      {loadDecorativeAssets && (
+      {shouldLoadDecor && (
         <Suspense fallback={null}>
           <StartControlDecor />
         </Suspense>
