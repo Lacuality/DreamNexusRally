@@ -2,10 +2,12 @@ import { useRally } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useEffect, useState } from "react";
 import { SettingsPanel } from "./SettingsPanel";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function PauseMenu() {
   const { resume, restart, showTutorial } = useRally();
   const [showSettings, setShowSettings] = useState(false);
+  const { t } = useTranslation();
   
   const handleKeyPress = (e: KeyboardEvent) => {
     if (e.key === "p" || e.key === "P") {
@@ -44,7 +46,7 @@ export function PauseMenu() {
             marginBottom: "40px",
           }}
         >
-          PAUSED
+          {t.pause.paused}
         </h1>
         
         <div style={{ display: "flex", gap: "20px", marginBottom: "20px" }}>
@@ -62,7 +64,7 @@ export function PauseMenu() {
               fontFamily: "monospace",
             }}
           >
-            Resume (P)
+            {t.pause.resume}
           </button>
           
           <button
@@ -79,7 +81,7 @@ export function PauseMenu() {
               fontFamily: "monospace",
             }}
           >
-            Quit to Menu
+            {t.pause.quitToMenu}
           </button>
         </div>
         
@@ -98,7 +100,7 @@ export function PauseMenu() {
               fontFamily: "monospace",
             }}
           >
-            Settings
+            {t.pause.settings}
           </button>
           
           <button
@@ -115,7 +117,7 @@ export function PauseMenu() {
               fontFamily: "monospace",
             }}
           >
-            How to Play
+            {t.pause.howToPlay}
           </button>
         </div>
       </div>
