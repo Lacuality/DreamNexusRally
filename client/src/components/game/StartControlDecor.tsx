@@ -4,13 +4,11 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 export function StartControlDecor() {
+  console.log("[StartControlDecor] Mounting - LIGHTWEIGHT VERSION");
+  
   const { scene: safetyBarrier } = useGLTF("/models/safety-barrier.glb");
   const { scene: trafficCone } = useGLTF("/models/traffic-cone.glb");
-  const { scene: controlTent } = useGLTF("/models/control-tent.glb");
-  const { scene: marshalClipboard } = useGLTF("/models/marshal-clipboard.glb");
-  const { scene: marshalRadio } = useGLTF("/models/marshal-radio.glb");
   const { scene: spectators } = useGLTF("/models/spectators.glb");
-  const { scene: serviceVan } = useGLTF("/models/service-van.glb");
 
   const laneWidth = 5;
   const startLineZ = 1;
@@ -34,6 +32,16 @@ export function StartControlDecor() {
     const mesh = trafficCone.children[0] as THREE.Mesh;
     return mesh?.material;
   }, [trafficCone]);
+
+  const spectatorsGeometry = useMemo(() => {
+    const mesh = spectators.children[0] as THREE.Mesh;
+    return mesh?.geometry;
+  }, [spectators]);
+
+  const spectatorsMaterial = useMemo(() => {
+    const mesh = spectators.children[0] as THREE.Mesh;
+    return mesh?.material;
+  }, [spectators]);
 
   const fogParticles = useMemo(() => {
     const particles = [];
@@ -100,59 +108,31 @@ export function StartControlDecor() {
         </Instances>
       )}
 
-      <primitive 
-        object={controlTent.clone()} 
-        position={[laneWidth / 2 + 3.5, 0, startLineZ - 2]} 
-        scale={2.0}
-      />
-
-      <mesh position={[laneWidth / 2 + 3.5, 0.5, startLineZ - 2]} receiveShadow>
-        <boxGeometry args={[1.2, 0.8, 0.6]} />
-        <meshStandardMaterial color="#8B4513" />
+      <mesh position={[laneWidth / 2 + 3.5, 1.2, startLineZ - 2]} receiveShadow castShadow>
+        <boxGeometry args={[2.5, 2.4, 2.5]} />
+        <meshStandardMaterial color="#FF6B6B" />
+      </mesh>
+      <mesh position={[laneWidth / 2 + 3.5, 0.1, startLineZ - 2]} receiveShadow>
+        <cylinderGeometry args={[0.15, 0.15, 0.2, 8]} />
+        <meshStandardMaterial color="#333333" />
       </mesh>
 
-      <mesh position={[laneWidth / 2 + 4.2, 0.3, startLineZ - 2.5]} receiveShadow>
-        <boxGeometry args={[0.4, 0.5, 0.4]} />
-        <meshStandardMaterial color="#654321" />
-      </mesh>
-      <mesh position={[laneWidth / 2 + 4.2, 0.3, startLineZ - 1.5]} receiveShadow>
-        <boxGeometry args={[0.4, 0.5, 0.4]} />
-        <meshStandardMaterial color="#654321" />
+      <mesh position={[-laneWidth / 2 - 2, 0.75, startLineZ - 2]} receiveShadow castShadow>
+        <boxGeometry args={[0.6, 1.5, 0.4]} />
+        <meshStandardMaterial color="#FFA500" />
       </mesh>
 
-      <primitive 
-        object={marshalClipboard.clone()} 
-        position={[-laneWidth / 2 - 2, 0, startLineZ - 2]} 
-        scale={1.5}
-        rotation={[0, Math.PI / 4, 0]}
-      />
+      <mesh position={[laneWidth / 2 + 2.5, 0.5, startLineZ - 2.5]} receiveShadow castShadow>
+        <boxGeometry args={[0.3, 1.0, 0.2]} />
+        <meshStandardMaterial color="#00FF41" />
+      </mesh>
 
-      <primitive 
-        object={marshalRadio.clone()} 
-        position={[laneWidth / 2 + 2.5, 0, startLineZ - 2.5]} 
-        scale={1.5}
-        rotation={[0, -Math.PI / 3, 0]}
-      />
-
-      <primitive 
-        object={spectators.clone()} 
-        position={[-laneWidth / 2 - 4, 0, startLineZ - 5]} 
-        scale={1.3}
-      />
-
-      <primitive 
-        object={spectators.clone()} 
-        position={[laneWidth / 2 + 5, 0, startLineZ - 6]} 
-        scale={1.3}
-        rotation={[0, Math.PI, 0]}
-      />
-
-      <primitive 
-        object={serviceVan.clone()} 
-        position={[-laneWidth / 2 - 6, 0, startLineZ - 11]} 
-        scale={2.2}
-        rotation={[0, Math.PI / 6, 0]}
-      />
+      {spectatorsGeometry && spectatorsMaterial && (
+        <Instances geometry={spectatorsGeometry} material={spectatorsMaterial}>
+          <Instance position={[-laneWidth / 2 - 4, 0, startLineZ - 5]} scale={1.3} />
+          <Instance position={[laneWidth / 2 + 5, 0, startLineZ - 6]} scale={1.3} rotation={[0, Math.PI, 0]} />
+        </Instances>
+      )}
 
       {[-2, -1, 0, 1, 2].map((offset) => (
         <mesh 
