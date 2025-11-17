@@ -14,7 +14,7 @@ interface TitleScreenImmersiveProps {
 }
 
 export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFullscreenSupported }: TitleScreenImmersiveProps) {
-  const { startLoading, highScore, loadHighScore, playerName, setPlayerName, loadPlayerName } = useRally();
+  const { startLoading, highScore, loadHighScore, playerName, setPlayerName, loadPlayerName, showTutorial } = useRally();
   const [nameInput, setNameInput] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
@@ -287,6 +287,26 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
               >
                 🚀 START RACE
               </button>
+
+              <button
+                onClick={showTutorial}
+                style={{
+                  width: "100%",
+                  fontFamily: "monospace",
+                  fontWeight: 600,
+                  fontSize: "16px",
+                  padding: "12px 36px",
+                  background: "rgba(74, 144, 226, 0.3)",
+                  color: DREAM_NEXUS_COLORS.white,
+                  border: "2px solid rgba(74, 144, 226, 0.6)",
+                  borderRadius: "12px",
+                  cursor: "pointer",
+                  boxShadow: "0 0 15px rgba(74, 144, 226, 0.3)",
+                  transition: "all 0.3s ease",
+                }}
+              >
+                📖 How to Play
+              </button>
             </div>
           </>
         ) : (
@@ -503,6 +523,33 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
             }}
           >
             🚀 START RACE
+          </button>
+
+          <button
+            onClick={showTutorial}
+            style={{
+              fontFamily: "monospace",
+              fontWeight: 600,
+              fontSize: "clamp(14px, 1.8vw, 16px)",
+              padding: "clamp(10px, 1.5vw, 12px) clamp(24px, 4vw, 32px)",
+              background: "rgba(74, 144, 226, 0.3)",
+              color: DREAM_NEXUS_COLORS.white,
+              border: "2px solid rgba(74, 144, 226, 0.6)",
+              borderRadius: "10px",
+              cursor: "pointer",
+              boxShadow: "0 0 15px rgba(74, 144, 226, 0.3)",
+              transition: "all 0.3s ease",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(74, 144, 226, 0.5)";
+              e.currentTarget.style.boxShadow = "0 0 25px rgba(74, 144, 226, 0.5)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(74, 144, 226, 0.3)";
+              e.currentTarget.style.boxShadow = "0 0 15px rgba(74, 144, 226, 0.3)";
+            }}
+          >
+            📖 How to Play
           </button>
 
               <div

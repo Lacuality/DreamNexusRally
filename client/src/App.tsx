@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useRally } from "./lib/stores/useRally";
 import { TitleScreenImmersive } from "./components/ui/TitleScreenImmersive";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
+import { Tutorial } from "./components/ui/Tutorial";
 import { GameScene } from "./components/game/GameScene";
 import { GameOverScreen } from "./components/ui/GameOverScreen";
 import { CountdownDisplay } from "./components/ui/CountdownDisplay";
@@ -34,6 +35,12 @@ function App() {
         <>
           <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
           <LoadingScreen />
+        </>
+      )}
+      {phase === "tutorial" && (
+        <>
+          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
+          <Tutorial />
         </>
       )}
       {phase === "playing" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}

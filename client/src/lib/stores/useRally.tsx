@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { audioManager } from "@/lib/audio";
 
-export type RallyPhase = "menu" | "loading" | "playing" | "paused" | "gameover";
+export type RallyPhase = "menu" | "loading" | "tutorial" | "playing" | "paused" | "gameover";
 
 interface RallyState {
   phase: RallyPhase;
@@ -16,6 +16,7 @@ interface RallyState {
   scoreSubmitted: boolean;
   countdown: number;
   isCountingDown: boolean;
+  tutorialReturnPhase: RallyPhase | null;
   
   start: () => void;
   pause: () => void;
@@ -33,6 +34,8 @@ interface RallyState {
   startCountdown: () => void;
   startLoading: () => void;
   finishLoading: () => void;
+  showTutorial: () => void;
+  closeTutorial: () => void;
 }
 
 export const useRally = create<RallyState>()(
@@ -48,6 +51,7 @@ export const useRally = create<RallyState>()(
     scoreSubmitted: false,
     countdown: 3,
     isCountingDown: false,
+    tutorialReturnPhase: null,
     
     startLoading: () => {
       audioManager.stopBackgroundMusic();
@@ -63,13 +67,45 @@ export const useRally = create<RallyState>()(
     },
     
     finishLoading: () => {
-      const now = Date.now();
-      set({ 
-        phase: "playing",
-        isCountingDown: true, 
-        countdown: 3,
-        startTime: now
-      });
+      const tutorialShown = sessionStorage.getItem("tutorialShown");
+      if (!tutorialShown) {
+        set({ phase: "tutorial", tutorialReturnPhase: "loading" });
+      } else {
+        const now = Date.now();
+        set({ 
+          phase: "playing",
+          isCountingDown: true, 
+          countdown: 3,
+          startTime: now
+        });
+      }
+    },
+    
+    showTutorial: () => {
+      const currentPhase = get().phase;
+      set({ phase: "tutorial", tutorialReturnPhase: currentPhase });
+    },
+    
+    closeTutorial: () => {
+      const state = get();
+      const returnPhase = state.tutorialReturnPhase;
+      
+      if (returnPhase === "menu") {
+        set({ phase: "menu", tutorialReturnPhase: null });
+      } else if (returnPhase === "paused") {
+        set({ phase: "paused", tutorialReturnPhase: null });
+      } else if (returnPhase === "loading") {
+        const now = Date.now();
+        set({ 
+          phase: "playing",
+          isCountingDown: true, 
+          countdown: 3,
+          startTime: now,
+          tutorialReturnPhase: null
+        });
+      } else {
+        set({ phase: "menu", tutorialReturnPhase: null });
+      }
     },
     
     startCountdown: () => {
