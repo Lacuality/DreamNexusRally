@@ -2,9 +2,11 @@ import { useRally } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useEffect } from "react";
 import { Leaderboard } from "./Leaderboard";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function GameOverScreen() {
   const { currentScore, highScore, restart } = useRally();
+  const { t } = useTranslation();
   const isNewHighScore = currentScore === highScore && currentScore > 0;
   
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -45,7 +47,7 @@ export function GameOverScreen() {
           marginBottom: "20px",
         }}
       >
-        GAME OVER
+        {t.gameOver.title}
       </h1>
       
       {isNewHighScore && (
@@ -57,7 +59,7 @@ export function GameOverScreen() {
             fontWeight: "bold",
           }}
         >
-          🎉 NEW HIGH SCORE! 🎉
+          {t.gameOver.newHighScore}
         </div>
       )}
       
@@ -77,7 +79,7 @@ export function GameOverScreen() {
             color: DREAM_NEXUS_COLORS.cyan,
           }}
         >
-          Distance Traveled
+          {t.gameOver.distanceTraveled}
         </div>
         <div
           style={{
@@ -96,7 +98,7 @@ export function GameOverScreen() {
             color: DREAM_NEXUS_COLORS.white,
           }}
         >
-          High Score: {highScore}m
+          {t.hud.highScore}: {highScore}m
         </div>
       </div>
       
@@ -117,7 +119,7 @@ export function GameOverScreen() {
           marginTop: "30px",
         }}
       >
-        Play Again (Enter)
+        {t.gameOver.playAgain}
       </button>
       
       <div
@@ -134,7 +136,7 @@ export function GameOverScreen() {
           style={{ width: "60px", height: "60px", objectFit: "contain" }}
         />
         <div style={{ fontSize: "16px", color: DREAM_NEXUS_COLORS.warm }}>
-          Thanks for playing Dream Nexus Rally!
+          {t.gameOver.thanks}
         </div>
       </div>
     </div>
