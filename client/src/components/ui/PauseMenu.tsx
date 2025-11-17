@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { SettingsPanel } from "./SettingsPanel";
 
 export function PauseMenu() {
-  const { resume, restart } = useRally();
+  const { resume, restart, showTutorial } = useRally();
   const [showSettings, setShowSettings] = useState(false);
   
   const handleKeyPress = (e: KeyboardEvent) => {
@@ -83,22 +83,41 @@ export function PauseMenu() {
           </button>
         </div>
         
-        <button
-          onClick={() => setShowSettings(true)}
-          style={{
-            fontSize: "18px",
-            padding: "12px 30px",
-            backgroundColor: "#555",
-            color: DREAM_NEXUS_COLORS.white,
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-            fontFamily: "monospace",
-          }}
-        >
-          Settings
-        </button>
+        <div style={{ display: "flex", gap: "15px" }}>
+          <button
+            onClick={() => setShowSettings(true)}
+            style={{
+              fontSize: "18px",
+              padding: "12px 30px",
+              backgroundColor: "#555",
+              color: DREAM_NEXUS_COLORS.white,
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontFamily: "monospace",
+            }}
+          >
+            Settings
+          </button>
+          
+          <button
+            onClick={showTutorial}
+            style={{
+              fontSize: "18px",
+              padding: "12px 30px",
+              backgroundColor: "#4A90E2",
+              color: DREAM_NEXUS_COLORS.white,
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              fontFamily: "monospace",
+            }}
+          >
+            How to Play
+          </button>
+        </div>
       </div>
       
       {showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
