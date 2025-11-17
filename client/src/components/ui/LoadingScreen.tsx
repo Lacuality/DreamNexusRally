@@ -1,6 +1,8 @@
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
+import { useProgress } from "@react-three/drei";
 
 export function LoadingScreen() {
+  const { progress, active, item } = useProgress();
 
   return (
     <div
@@ -45,10 +47,10 @@ export function LoadingScreen() {
         >
           <div
             style={{
-              width: "100%",
+              width: `${progress}%`,
               height: "100%",
               background: `linear-gradient(90deg, ${DREAM_NEXUS_COLORS.cyan}, ${DREAM_NEXUS_COLORS.white})`,
-              animation: "loadingBarPulse 1.5s ease-in-out infinite",
+              transition: "width 0.3s ease-out",
               boxShadow: `0 0 10px ${DREAM_NEXUS_COLORS.cyan}`,
             }}
           />
@@ -57,14 +59,27 @@ export function LoadingScreen() {
         <div
           style={{
             marginTop: "30px",
-            fontSize: "clamp(12px, 2vw, 16px)",
+            fontSize: "clamp(14px, 2.5vw, 18px)",
+            color: DREAM_NEXUS_COLORS.cyan,
+            fontFamily: "monospace",
+            fontWeight: "600",
+            marginBottom: "10px",
+          }}
+        >
+          {Math.round(progress)}%
+        </div>
+
+        <div
+          style={{
+            marginTop: "10px",
+            fontSize: "clamp(12px, 2vw, 14px)",
             color: DREAM_NEXUS_COLORS.cyan,
             fontFamily: "monospace",
             opacity: 0.7,
-            animation: "loadingPulse 1.5s ease-in-out infinite",
+            height: "40px",
           }}
         >
-          Loading models and preparing race infrastructure...
+          {active ? (item ? `Loading ${item.split('/').pop()}...` : "Loading essential race infrastructure...") : "Ready!"}
         </div>
       </div>
 
