@@ -235,6 +235,16 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
             toneMapping: THREE.ACESFilmicToneMapping,
           }}
           shadows={{ type: THREE.PCFSoftShadowMap }}
+          onCreated={({ gl }) => {
+            console.log("[Canvas] WebGL context created");
+            gl.domElement.addEventListener('webglcontextlost', (event) => {
+              console.error("[Canvas] WebGL context lost!", event);
+              event.preventDefault();
+            });
+            gl.domElement.addEventListener('webglcontextrestored', () => {
+              console.log("[Canvas] WebGL context restored");
+            });
+          }}
         >
           <Suspense fallback={<ambientLight intensity={0.5} />}>
             <SceneContents
