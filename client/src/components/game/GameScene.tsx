@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { KeyboardControls } from "@react-three/drei";
+import { KeyboardControls, useProgress } from "@react-three/drei";
 import { Suspense, useState, useRef, useEffect } from "react";
 import * as THREE from "three";
 import { Controls } from "./Car";
@@ -13,6 +13,29 @@ import { MobileControls } from "../ui/MobileControls";
 import { TuningPanel } from "../ui/TuningPanel";
 import { GAME_CONFIG } from "@/lib/constants";
 import { audioManager } from "@/lib/audio";
+
+function LoadingWatcher() {
+  const { active, progress } = useProgress();
+  const finishLoading = useRally((state) => state.finishLoading);
+  const phase = useRally((state) => state.phase);
+  const hasTriggeredRef = useRef(false);
+
+  useEffect(() => {
+    console.log("LoadingWatcher: active=", active, "progress=", progress, "phase=", phase);
+    
+    if (phase === "loading" && !active && !hasTriggeredRef.current) {
+      console.log("Loading complete! Calling finishLoading to start countdown");
+      hasTriggeredRef.current = true;
+      finishLoading();
+    }
+    
+    if (phase !== "loading") {
+      hasTriggeredRef.current = false;
+    }
+  }, [active, progress, phase, finishLoading]);
+
+  return null;
+}
 
 function FrameSync({
   carPositionRef,
@@ -226,13 +249,13 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
               collisionSparkPosition={collisionSparkPosition}
               showCollisionSparks={showCollisionSparks}
               cameraShakeIntensity={cameraShakeIntensity}
-              onReady={phase === "loading" ? finishLoading : undefined}
             />
             <FrameSync
               carPositionRef={carPositionRef}
               carSpeedRef={carSpeedRef}
             />
           </Suspense>
+          <LoadingWatcher />
         </Canvas>
       </KeyboardControls>
 
