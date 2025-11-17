@@ -56,14 +56,6 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
     };
   }, []);
 
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") onStartRace();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onStartRace]);
-
   return (
     <div
       onClick={handleStartMusic}
@@ -342,17 +334,6 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
               >
                 {t.howToPlay}
               </button>
-
-              <div
-                style={{
-                  fontSize: "clamp(10px, 1.3vw, 12px)",
-                  color: DREAM_NEXUS_COLORS.warm,
-                  opacity: 0.8,
-                  textAlign: "center",
-                }}
-              >
-                Press Enter to Start • Sponsored by Dream Nexus
-              </div>
             </div>
           </>
         )}
