@@ -9,6 +9,7 @@ export function StartControlDecor() {
   const { scene: safetyBarrier } = useGLTF("/models/safety-barrier.glb");
   const { scene: trafficCone } = useGLTF("/models/traffic-cone.glb");
   const { scene: spectators } = useGLTF("/models/spectators.glb");
+  const { scene: startGate } = useGLTF("/start gate_1763381139328.glb");
 
   const laneWidth = 5;
   const startLineZ = 1;
@@ -108,24 +109,12 @@ export function StartControlDecor() {
         </Instances>
       )}
 
-      <mesh position={[laneWidth / 2 + 3.5, 1.2, startLineZ - 2]} receiveShadow castShadow>
-        <boxGeometry args={[2.5, 2.4, 2.5]} />
-        <meshStandardMaterial color="#FF6B6B" />
-      </mesh>
-      <mesh position={[laneWidth / 2 + 3.5, 0.1, startLineZ - 2]} receiveShadow>
-        <cylinderGeometry args={[0.15, 0.15, 0.2, 8]} />
-        <meshStandardMaterial color="#333333" />
-      </mesh>
-
-      <mesh position={[-laneWidth / 2 - 2, 0.75, startLineZ - 2]} receiveShadow castShadow>
-        <boxGeometry args={[0.6, 1.5, 0.4]} />
-        <meshStandardMaterial color="#FFA500" />
-      </mesh>
-
-      <mesh position={[laneWidth / 2 + 2.5, 0.5, startLineZ - 2.5]} receiveShadow castShadow>
-        <boxGeometry args={[0.3, 1.0, 0.2]} />
-        <meshStandardMaterial color="#00FF41" />
-      </mesh>
+      <primitive 
+        object={startGate} 
+        position={[0, 0, startLineZ]} 
+        scale={2.5}
+        rotation={[0, 0, 0]}
+      />
 
       {spectatorsGeometry && spectatorsMaterial && (
         <Instances geometry={spectatorsGeometry} material={spectatorsMaterial}>
@@ -145,8 +134,6 @@ export function StartControlDecor() {
           <meshStandardMaterial color="#1a1a1a" opacity={0.6} transparent />
         </mesh>
       ))}
-
-      <pointLight position={[laneWidth / 2 + 3.5, 3, startLineZ - 2]} intensity={80} distance={8} color="#FF6B6B" />
 
       {fogParticles.map((particle, index) => (
         <mesh
