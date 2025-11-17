@@ -58,18 +58,21 @@ function makeDeformedPlane(
 
 export function Road({ carPositionRef }: RoadProps) {
   const roadRef = useRef<THREE.Mesh>(null);
-  const asphaltTexture = useTexture("/textures/asphalt.png");
+  // TEMPORARILY DISABLED: const asphaltTexture = useTexture("/textures/asphalt.png");
   const scrollOffset = useRef(0);
 
-  useEffect(() => {
-    console.log("[Road] Asphalt texture loaded, configuring...");
-    if (asphaltTexture) {
-      asphaltTexture.wrapS = asphaltTexture.wrapT = THREE.RepeatWrapping;
-      asphaltTexture.repeat.set(4, ROAD_LENGTH / 8);
-      asphaltTexture.anisotropy = 8;
-      console.log("[Road] Texture configured successfully");
-    }
-  }, [asphaltTexture]);
+  console.log("[Road] Component rendering");
+
+  // TEMPORARILY DISABLED texture config
+  // useEffect(() => {
+  //   console.log("[Road] Asphalt texture loaded, configuring...");
+  //   if (asphaltTexture) {
+  //     asphaltTexture.wrapS = asphaltTexture.wrapT = THREE.RepeatWrapping;
+  //     asphaltTexture.repeat.set(4, ROAD_LENGTH / 8);
+  //     asphaltTexture.anisotropy = 8;
+  //     console.log("[Road] Texture configured successfully");
+  //   }
+  // }, [asphaltTexture]);
 
   // road surface
   const roadGeometry = useMemo(
@@ -81,8 +84,8 @@ export function Road({ carPositionRef }: RoadProps) {
     if (roadRef.current) {
       roadRef.current.position.z = carPositionRef.current.z - 50;
       
-      scrollOffset.current = carPositionRef.current.z * 0.125;
-      asphaltTexture.offset.y = scrollOffset.current;
+      // TEMPORARILY DISABLED: scrollOffset.current = carPositionRef.current.z * 0.125;
+      // TEMPORARILY DISABLED: asphaltTexture.offset.y = scrollOffset.current;
     }
   });
 
@@ -90,7 +93,7 @@ export function Road({ carPositionRef }: RoadProps) {
     <group>
       <mesh ref={roadRef} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <primitive object={roadGeometry} />
-        <meshStandardMaterial map={asphaltTexture} roughness={0.95} metalness={0.05} />
+        <meshStandardMaterial color="#2a2a2a" roughness={0.95} metalness={0.05} />
       </mesh>
 
       <RoadEdges carPositionRef={carPositionRef} />
