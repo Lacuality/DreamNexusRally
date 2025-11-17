@@ -18,6 +18,7 @@ interface TitleScreenImmersiveProps {
 export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFullscreenSupported, onStartRace }: TitleScreenImmersiveProps) {
   const { highScore, loadHighScore, showTutorial } = useRally();
   const [isMobile, setIsMobile] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const musicStartedRef = useRef(false);
   const { t } = useTranslation();
 
@@ -120,6 +121,45 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                 DREAM NEXUS RALLY
               </h1>
             </div>
+
+            {/* Leaderboard Toggle - Top Right */}
+            <button
+              onClick={() => setShowLeaderboard(!showLeaderboard)}
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                width: "44px",
+                height: "44px",
+                background: "rgba(14, 27, 36, 0.8)",
+                backdropFilter: "blur(10px)",
+                border: `2px solid ${DREAM_NEXUS_COLORS.cyan}`,
+                borderRadius: "10px",
+                color: DREAM_NEXUS_COLORS.cyan,
+                fontSize: "18px",
+                cursor: "pointer",
+                pointerEvents: "auto",
+                boxShadow: "0 0 15px rgba(36, 160, 206, 0.3)",
+              }}
+            >
+              🏆
+            </button>
+
+            {/* Leaderboard Panel */}
+            {showLeaderboard && (
+              <div style={{ 
+                position: "absolute", 
+                top: "60px", 
+                right: "10px",
+                maxWidth: "90vw",
+                width: "300px",
+                pointerEvents: "auto",
+              }}>
+                <HolographicPanel>
+                  <Leaderboard />
+                </HolographicPanel>
+              </div>
+            )}
 
             {/* Buttons - Bottom Center */}
             <div style={{ 
