@@ -1,5 +1,7 @@
 import { useSettings } from "@/lib/stores/useSettings";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n/useTranslation";
+import { useLanguage, Language } from "@/lib/stores/useLanguage";
 
 interface SettingsPanelProps {
   onClose: () => void;
@@ -14,6 +16,8 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
     toggleReducedMotion,
     toggleHighContrast,
   } = useSettings();
+  const { language, setLanguage } = useLanguage();
+  const { t } = useTranslation();
   
   return (
     <div
@@ -49,7 +53,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
             textAlign: "center",
           }}
         >
-          Settings
+          {t.settings.title}
         </h2>
         
         <div style={{ marginBottom: "30px" }}>
@@ -60,7 +64,55 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
               marginBottom: "15px",
             }}
           >
-            Weather
+            {t.settings.language}
+          </h3>
+          <div style={{ display: "flex", gap: "10px" }}>
+            <button
+              onClick={() => setLanguage("en")}
+              style={{
+                flex: 1,
+                padding: "12px",
+                backgroundColor: language === "en" ? DREAM_NEXUS_COLORS.cyan : "#555",
+                color: language === "en" ? DREAM_NEXUS_COLORS.navy : DREAM_NEXUS_COLORS.white,
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontFamily: "monospace",
+              }}
+            >
+              {t.settings.english}
+            </button>
+            <button
+              onClick={() => setLanguage("es")}
+              style={{
+                flex: 1,
+                padding: "12px",
+                backgroundColor: language === "es" ? DREAM_NEXUS_COLORS.cyan : "#555",
+                color: language === "es" ? DREAM_NEXUS_COLORS.navy : DREAM_NEXUS_COLORS.white,
+                border: "none",
+                borderRadius: "8px",
+                fontSize: "16px",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontFamily: "monospace",
+              }}
+            >
+              {t.settings.spanish}
+            </button>
+          </div>
+        </div>
+        
+        <div style={{ marginBottom: "30px" }}>
+          <h3
+            style={{
+              color: DREAM_NEXUS_COLORS.warm,
+              fontSize: "20px",
+              marginBottom: "15px",
+            }}
+          >
+            {t.settings.weather}
           </h3>
           <button
             onClick={toggleWeather}
@@ -77,7 +129,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
               fontFamily: "monospace",
             }}
           >
-            {weather === "sunny" ? "☀️ Sunny" : "☁️ Overcast"}
+            {weather === "sunny" ? t.settings.sunny : t.settings.overcast}
           </button>
         </div>
         
@@ -89,7 +141,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
               marginBottom: "15px",
             }}
           >
-            Accessibility
+            {t.settings.accessibility}
           </h3>
           
           <label
@@ -113,7 +165,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
                 cursor: "pointer",
               }}
             />
-            Reduced Motion
+            {t.settings.reducedMotion}
           </label>
           
           <label
@@ -137,7 +189,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
                 cursor: "pointer",
               }}
             />
-            High Contrast Mode
+            {t.settings.highContrast}
           </label>
         </div>
         
@@ -157,7 +209,7 @@ export function SettingsPanel({ onClose }: SettingsPanelProps) {
               fontFamily: "monospace",
             }}
           >
-            Close
+            {t.settings.close}
           </button>
         </div>
       </div>
