@@ -1,6 +1,8 @@
 import { useEffect, Suspense } from "react";
 import { Environment } from "./Environment";
 import { StartControlCore } from "./StartControlCore";
+import { StartControlDecor } from "./StartControlDecor";
+import { SponsorBanners } from "./SponsorBanners";
 import { Road } from "./Road";
 import { BiomePropsScene } from "./BiomeProps";
 import { Car } from "./Car";
@@ -56,6 +58,12 @@ export function SceneContents({
       <Environment />
       <Suspense fallback={null}>
         <StartControlCore />
+      </Suspense>
+      <Suspense fallback={null}>
+        <StartControlDecor />
+      </Suspense>
+      <Suspense fallback={null}>
+        <SponsorBanners />
       </Suspense>
       <Road carPositionRef={carPositionRef} />
       <BiomePropsScene carPositionRef={carPositionRef} />
