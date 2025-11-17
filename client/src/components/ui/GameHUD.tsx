@@ -1,5 +1,6 @@
 import { useRally } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
 interface GameHUDProps {
   nitroActive?: boolean;
@@ -10,6 +11,7 @@ interface GameHUDProps {
 
 export function GameHUD({ nitroActive = false, shieldActive = false, isFullscreen = false, onToggleFullscreen }: GameHUDProps = {}) {
   const { distance, speed, highScore, collectiblesCount, currentScore, pause } = useRally();
+  const { t } = useTranslation();
   
   return (
     <div
@@ -38,19 +40,19 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
         }}
       >
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.cyan }}>
-          <strong>Distance:</strong> {Math.floor(distance)}m
+          <strong>{t.hud.distance}:</strong> {Math.floor(distance)}m
         </div>
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.warm }}>
-          <strong>Speed:</strong> {Math.floor(speed)} km/h
+          <strong>{t.hud.speed}:</strong> {Math.floor(speed)} km/h
         </div>
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.warm }}>
-          <strong>Arequipe Jars:</strong> {collectiblesCount}
+          <strong>{t.hud.arequipeJars}:</strong> {collectiblesCount}
         </div>
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.cyan }}>
-          <strong>Score:</strong> {currentScore}
+          <strong>{t.hud.score}:</strong> {currentScore}
         </div>
         <div style={{ color: DREAM_NEXUS_COLORS.white }}>
-          <strong>High Score:</strong> {highScore}
+          <strong>{t.hud.highScore}:</strong> {highScore}
         </div>
       </div>
       
@@ -79,7 +81,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
               fontFamily: "monospace",
             }}
           >
-            Exit Fullscreen
+            {t.hud.exitFullscreen}
           </button>
         )}
         <button
@@ -96,7 +98,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
             fontFamily: "monospace",
           }}
         >
-          Pause (P)
+          {t.hud.pause}
         </button>
       </div>
       
@@ -132,7 +134,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
               borderRadius: "50%",
               boxShadow: "0 0 10px #ff6b00"
             }} />
-            NITRO BOOST
+            {t.hud.nitroBoost}
           </div>
         )}
         
@@ -158,7 +160,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
               borderRadius: "50%",
               boxShadow: "0 0 10px #24A0CE"
             }} />
-            SHIELD ACTIVE
+            {t.hud.shieldActive}
           </div>
         )}
       </div>

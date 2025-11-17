@@ -6,6 +6,8 @@ import { HolographicPanel } from "./HolographicPanel";
 import { Leaderboard } from "./Leaderboard";
 import { FullscreenButton } from "./FullscreenButton";
 import { audioManager } from "@/lib/audio";
+import { useTranslation } from "@/lib/i18n/useTranslation";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 interface TitleScreenImmersiveProps {
   isFullscreen: boolean;
@@ -19,6 +21,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
   const [isMobile, setIsMobile] = useState(false);
   const [showControls, setShowControls] = useState(false);
   const musicStartedRef = useRef(false);
+  const { t } = useTranslation();
 
   const handleStartMusic = () => {
     if (!musicStartedRef.current) {
@@ -211,14 +214,14 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                     textShadow: "0 0 10px rgba(36, 160, 206, 0.5)",
                   }}
                 >
-                  🏁 Enter Your Name
+                  🏁 {t.enterName}
                 </label>
                 <input
                   id="player-name-input"
                   type="text"
                   value={nameInput}
                   onChange={(e) => setNameInput(e.target.value)}
-                  placeholder="Racer Name"
+                  placeholder={t.racerName}
                   maxLength={20}
                   aria-label="Enter your racer name"
                   aria-required="true"
@@ -256,7 +259,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                       textAlign: "center",
                     }}
                   >
-                    Your Best: {highScore}m
+                    {t.yourHighScore}: {highScore}m
                   </div>
                 )}
               </HolographicPanel>
@@ -285,7 +288,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                   textShadow: nameInput.trim() ? "0 2px 5px rgba(0,0,0,0.3)" : "none",
                 }}
               >
-                🚀 START RACE
+                {t.startRace}
               </button>
 
               <button
@@ -305,7 +308,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                   transition: "all 0.3s ease",
                 }}
               >
-                📖 How to Play
+                {t.howToPlay}
               </button>
             </div>
           </>
@@ -344,7 +347,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                   animation: "textGlow 2s ease-in-out infinite alternate",
                 }}
               >
-                DREAM NEXUS RALLY
+                {t.title}
               </h1>
               <p
                 style={{
@@ -353,10 +356,11 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                   margin: 0,
                   textShadow: "0 2px 10px rgba(0,0,0,0.5)",
                 }}
-              >
-                Race with <strong>Pixel the Bunny</strong> through Colombia!
-              </p>
+                dangerouslySetInnerHTML={{ __html: t.tagline }}
+              />
             </div>
+
+            <LanguageSwitcher />
 
             {/* Controls - Bottom Left */}
             <div style={{ 
@@ -436,14 +440,14 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                 textShadow: "0 0 10px rgba(36, 160, 206, 0.5)",
               }}
             >
-              🏁 Enter Your Name
+              🏁 {t.enterName}
             </label>
             <input
               id="player-name-input"
               type="text"
               value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
-              placeholder="Racer Name"
+              placeholder={t.racerName}
               maxLength={20}
               aria-label="Enter your racer name"
               aria-required="true"
@@ -481,7 +485,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
                   textAlign: "center",
                 }}
               >
-                Your Best: {highScore}m
+                {t.yourHighScore}: {highScore}m
               </div>
             )}
           </HolographicPanel>
@@ -502,7 +506,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
               borderRadius: "14px",
               cursor: nameInput.trim() ? "pointer" : "not-allowed",
               boxShadow: nameInput.trim()
-                ? "0 0 30px rgba(36, 160, 206, 0.6), 0 10px 25px rgba(0,0,0,0.4)"
+                  ? "0 0 30px rgba(36, 160, 206, 0.6), 0 10px 25px rgba(0,0,0,0.4)"
                 : "none",
               transform: "translateZ(0)",
               transition: "all 0.3s ease",
@@ -522,7 +526,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
               }
             }}
           >
-            🚀 START RACE
+            {t.startRace}
           </button>
 
           <button
@@ -549,7 +553,7 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
               e.currentTarget.style.boxShadow = "0 0 15px rgba(74, 144, 226, 0.3)";
             }}
           >
-            📖 How to Play
+            {t.howToPlay}
           </button>
 
               <div
