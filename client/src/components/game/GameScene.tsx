@@ -197,7 +197,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
     if (collectible.type === "arequipe") {
       console.log("Collected arequipe jar! +50 points, speed burst!");
       addCollectible();
-      audioManager.playSuccess();
+      audioManager.playPickup();
       setBoostCounter((prev) => prev + 1);
     } else if (collectible.type === "nitro") {
       console.log("Collected nitro! +20% speed for 2 seconds!");
