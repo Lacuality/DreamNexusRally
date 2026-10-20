@@ -271,7 +271,7 @@ function layOut(meshes: Record<PlantType, THREE.InstancedMesh>, firstChunk: numb
         const side = rand() < 0.5 ? -1 : 1;
         const z = z0 + rand() * CHUNK;
         // Keep the start-line area clear for the grandstands and barriers.
-        const minX = z < 70 ? Math.max(xMin, 13) : xMin;
+        const minX = z < 30 ? Math.max(xMin, 18) : z < 70 ? Math.max(xMin, 13) : xMin;
         // Bias towards the road so more plants are actually seen.
         let d = minX + Math.pow(rand(), 1.6) * (xMax - minX);
 

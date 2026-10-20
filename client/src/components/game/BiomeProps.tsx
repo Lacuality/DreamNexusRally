@@ -36,6 +36,7 @@ function CoffeeHillsProps({ carPositionRef }: { carPositionRef: React.MutableRef
         
         for (let i = 0; i < 24; i++) {
           const z = segment * 50 + (i * 12) - 60;
+          if (z < 24) continue; // keep the start line area clear
           const side = i % 2 === 0 ? -1 : 1;
           const seed = segment * 97 + i;
           const rand = (n: number) => Math.abs(Math.sin(seed * n));
@@ -88,6 +89,7 @@ function PuebloProps({ carPositionRef }: { carPositionRef: React.MutableRefObjec
         
         for (let i = 0; i < 14; i++) {
           const z = segment * 70 + (i * 24) - 72;
+          if (z < 24) continue; // keep the start line area clear
           const side = i % 2 === 0 ? -1 : 1;
           const seed = segment * 149 + i;
           const rand = (n: number) => Math.abs(Math.sin(seed * n));
