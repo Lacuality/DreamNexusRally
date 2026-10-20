@@ -1,4 +1,4 @@
-import { useRally } from "@/lib/stores/useRally";
+import { useRally, liveScore } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { useState, useEffect } from "react";
@@ -11,7 +11,7 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ nitroActive = false, shieldActive = false, isFullscreen = false, onToggleFullscreen }: GameHUDProps = {}) {
-  const { distance, speed, highScore, collectiblesCount, currentScore, pause } = useRally();
+  const { distance, speed, highScore, collectiblesCount, bonusPoints, combo, pause } = useRally();
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -37,6 +37,35 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
         zIndex: 100,
       }}
     >
+      {isMobile ? (
+        // Compact two-line panel on phones, so the road ahead stays visible.
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(10px + env(safe-area-inset-top, 0px))",
+            left: "calc(10px + env(safe-area-inset-left, 0px))",
+            backgroundColor: "rgba(14, 27, 36, 0.75)",
+            padding: "6px 10px",
+            borderRadius: "8px",
+            border: `1px solid ${DREAM_NEXUS_COLORS.cyan}`,
+            color: DREAM_NEXUS_COLORS.white,
+            fontSize: "13px",
+            lineHeight: 1.4,
+            fontVariantNumeric: "tabular-nums",
+          }}
+        >
+          <div>
+            <strong style={{ color: DREAM_NEXUS_COLORS.warm, fontSize: "18px" }}>{Math.floor(speed)}</strong>
+            <span style={{ color: DREAM_NEXUS_COLORS.warm }}> km/h</span>
+            <span style={{ color: DREAM_NEXUS_COLORS.cyan, marginLeft: "10px" }}>
+              {liveScore(distance, collectiblesCount, bonusPoints)}{combo > 1 ? ` x${combo}` : ""}
+            </span>
+          </div>
+          <div style={{ color: DREAM_NEXUS_COLORS.cyan, opacity: 0.9 }}>
+            {Math.floor(distance)}m · 🍯 {collectiblesCount}
+          </div>
+        </div>
+      ) : (
       <div
         style={{
           position: "absolute",
@@ -60,18 +89,19 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
           <strong>{t.hud.arequipeJars}:</strong> {collectiblesCount}
         </div>
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.cyan }}>
-          <strong>{t.hud.score}:</strong> {currentScore}
+          <strong>{t.hud.score}:</strong> {liveScore(distance, collectiblesCount, bonusPoints)}{combo > 1 ? `  x${combo}` : ""}
         </div>
         <div style={{ color: DREAM_NEXUS_COLORS.white }}>
           <strong>{t.hud.highScore}:</strong> {highScore}
         </div>
       </div>
-      
+      )}
+
       <div
         style={{
           position: "absolute",
-          top: isMobile ? "200px" : "20px",
-          right: isMobile ? "10px" : "20px",
+          top: isMobile ? "calc(10px + env(safe-area-inset-top, 0px))" : "20px",
+          right: isMobile ? "calc(10px + env(safe-area-inset-right, 0px))" : "20px",
           pointerEvents: "auto",
           display: "flex",
           flexDirection: isMobile ? "column" : "row",
@@ -179,6 +209,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
         )}
       </div>
       
+      {!isMobile && (
       <div
         style={{
           position: "absolute",
@@ -203,6 +234,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
           style={{ width: "120px", objectFit: "contain" }}
         />
       </div>
+      )}
       
       <style>{`
         @keyframes pulse {

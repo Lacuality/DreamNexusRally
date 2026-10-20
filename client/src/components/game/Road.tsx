@@ -10,7 +10,11 @@ interface RoadProps {
 }
 
 /* --------- Tunables --------- */
-const ROAD_LENGTH = 200;
+const ROAD_LENGTH = 220;
+// How far the road reaches behind the car; the rest is ahead of it.
+const ROAD_BEHIND = 30;
+// Dash spacing; the road moves in whole steps of this so dashes stay fixed on the ground.
+const DASH_PERIOD = 6;
 const ROAD_WIDTH  = GAME_CONFIG.LANE_WIDTH + 0.6;
 
 const EDGE_WIDTH  = 0.28;
@@ -23,11 +27,18 @@ const DASH_WIDTH  = 0.16;
 const DASH_LIFT   = 0.011;    // slightly below edges so ordering is stable
 
 /* --------- One single source of truth for road shape --------- */
-function sampleCurveAndElev(z: number) {
-  // “z” is forward along the road BEFORE the -90° X rotation
-  const curve = Math.sin(z * 0.02) * 2.0;
-  const elev  = Math.sin(z * 0.03) * 0.5 + Math.cos(z * 0.05) * 0.3;
-  return { curve, elev };
+// The road is straight and flat. Bends and hills used to be baked into this
+// strip, but the strip follows the car, so they travelled with it and dipped
+// the road under the grass right below the car. Gameplay is lane-based, so a
+// straight road matches what the car actually does.
+function sampleCurveAndElev(_z: number) {
+  return { curve: 0, elev: 0 };
+}
+
+/** World z for the road strip's centre, snapped so the dashes don't slide. */
+export function roadCenterZ(carZ: number) {
+  const snapped = Math.floor(carZ / DASH_PERIOD) * DASH_PERIOD;
+  return snapped - ROAD_BEHIND + ROAD_LENGTH / 2;
 }
 
 /** Create a plane already deformed by the road function. */
@@ -61,7 +72,6 @@ export function Road({ carPositionRef }: RoadProps) {
   // TEMPORARILY DISABLED: const asphaltTexture = useTexture("/textures/asphalt.png");
   const scrollOffset = useRef(0);
 
-  console.log("[Road] Component rendering");
 
   // TEMPORARILY DISABLED texture config
   // useEffect(() => {
@@ -82,7 +92,7 @@ export function Road({ carPositionRef }: RoadProps) {
 
   useFrame(() => {
     if (roadRef.current) {
-      roadRef.current.position.z = carPositionRef.current.z - 50;
+      roadRef.current.position.z = roadCenterZ(carPositionRef.current.z);
       
       // TEMPORARILY DISABLED: scrollOffset.current = carPositionRef.current.z * 0.125;
       // TEMPORARILY DISABLED: asphaltTexture.offset.y = scrollOffset.current;
@@ -122,7 +132,7 @@ function RoadEdges({
   }, []);
 
   useFrame(() => {
-    const z = carPositionRef.current.z - 50;
+    const z = roadCenterZ(carPositionRef.current.z);
     if (leftEdgeRef.current) leftEdgeRef.current.position.z = z;
     if (rightEdgeRef.current) rightEdgeRef.current.position.z = z;
   });
@@ -166,7 +176,7 @@ function CenterLine({
   );
 
   const dashCount = useMemo(
-    () => Math.floor(ROAD_LENGTH / (DASH_LEN + DASH_GAP)) + 6,
+    () => Math.floor(ROAD_LENGTH / DASH_PERIOD) + 1,
     []
   );
 
@@ -179,7 +189,7 @@ function CenterLine({
     const pos = new THREE.Vector3();
 
     for (let i = 0; i < dashCount; i++) {
-      const zLocal = -ROAD_LENGTH / 2 + i * (DASH_LEN + DASH_GAP);
+      const zLocal = -ROAD_LENGTH / 2 + i * DASH_PERIOD;
       const { curve, elev } = sampleCurveAndElev(zLocal);
 
       // Center line: lateral = curve (no offset), height = elev + DASH_LIFT
@@ -192,7 +202,7 @@ function CenterLine({
 
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.position.z = carPositionRef.current.z - 50;
+      groupRef.current.position.z = roadCenterZ(carPositionRef.current.z);
     }
   });
 
@@ -205,7 +215,8 @@ function CenterLine({
   };
 
   return (
-    <group ref={groupRef} rotation={[-Math.PI / 2, 0, 0]}>
+    // Not rotated: dashes are laid out directly in world space along +z, flat on the road.
+    <group ref={groupRef}>
       <instancedMesh ref={meshCallbackRef} args={[dashGeometry, undefined as any, dashCount]}>
         <meshStandardMaterial
           color={DREAM_NEXUS_COLORS.roadLine}

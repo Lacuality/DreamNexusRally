@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { storageSet } from "@/lib/safeStorage";
 import { useRally } from "@/lib/stores/useRally";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/lib/i18n/useTranslation";
@@ -16,7 +17,7 @@ export function Tutorial() {
 
   const handleNext = () => {
     if (isLastCard) {
-      sessionStorage.setItem("tutorialShown", "true");
+      storageSet("tutorialShown", "true", "session");
       closeTutorial();
     } else {
       setCurrentCard(currentCard + 1);
@@ -24,7 +25,7 @@ export function Tutorial() {
   };
 
   const handleSkip = () => {
-    sessionStorage.setItem("tutorialShown", "true");
+    storageSet("tutorialShown", "true", "session");
     closeTutorial();
   };
 

@@ -5,7 +5,7 @@ import { Leaderboard } from "./Leaderboard";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 
 export function GameOverScreen() {
-  const { currentScore, highScore, restart } = useRally();
+  const { currentScore, highScore, distance, restart } = useRally();
   const { t } = useTranslation();
   const isNewHighScore = currentScore === highScore && currentScore > 0;
   
@@ -32,7 +32,8 @@ export function GameOverScreen() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        // "safe" keeps the top visible when the content is taller than a phone screen.
+        justifyContent: "safe center",
         zIndex: 1000,
         fontFamily: "monospace",
         color: DREAM_NEXUS_COLORS.white,
@@ -79,7 +80,7 @@ export function GameOverScreen() {
             color: DREAM_NEXUS_COLORS.cyan,
           }}
         >
-          {t.gameOver.distanceTraveled}
+          {t.hud.score}
         </div>
         <div
           style={{
@@ -89,7 +90,10 @@ export function GameOverScreen() {
             marginBottom: "20px",
           }}
         >
-          {currentScore}m
+          {currentScore}
+        </div>
+        <div style={{ fontSize: "18px", color: DREAM_NEXUS_COLORS.cyan, marginBottom: "12px" }}>
+          {t.gameOver.distanceTraveled}: {Math.floor(distance)}m
         </div>
         
         <div
@@ -98,7 +102,7 @@ export function GameOverScreen() {
             color: DREAM_NEXUS_COLORS.white,
           }}
         >
-          {t.hud.highScore}: {highScore}m
+          {t.hud.highScore}: {highScore}
         </div>
       </div>
       

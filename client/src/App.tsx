@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { storageGet } from "./lib/safeStorage";
 import { useRally } from "./lib/stores/useRally";
 import { TitleScreenImmersive } from "./components/ui/TitleScreenImmersive";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
@@ -25,7 +26,7 @@ function App() {
     console.log("Dream Nexus Rally initialized. Phase:", phase);
     loadPlayerName();
     
-    const languageSelected = localStorage.getItem('dream-nexus-language');
+    const languageSelected = storageGet('dream-nexus-language');
     if (!languageSelected) {
       setShowLanguageSelection(true);
     }
@@ -50,9 +51,18 @@ function App() {
     setShowNameInput(true);
   };
 
+  // After the name is set, Pixel climbs into the car on the menu scene; the race
+  // loads once that little cinematic has finished.
+  const [boarding, setBoarding] = useState(false);
+
   const handleNameSubmit = (name: string) => {
     setPlayerName(name);
     setShowNameInput(false);
+    setBoarding(true);
+  };
+
+  const handleBoarded = () => {
+    setBoarding(false);
     startLoading();
   };
   
@@ -60,27 +70,12 @@ function App() {
     <div ref={elementRef} style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {showLanguageSelection && <LanguageSelectionModal onSelectLanguage={handleLanguageSelect} />}
       {showNameInput && <NameInputScreen onSubmit={handleNameSubmit} initialName={playerName} />}
-      {phase === "menu" && <TitleScreenImmersive isFullscreen={isFullscreen} onToggleFullscreen={toggle} isFullscreenSupported={isSupported} onStartRace={handleStartRace} />}
-      {phase === "loading" && (
-        <>
-          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
-          <LoadingScreen />
-        </>
-      )}
-      {phase === "tutorial" && (
-        <>
-          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
-          <Tutorial />
-        </>
-      )}
-      {phase === "playing" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
-      {phase === "paused" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
-      {phase === "gameover" && (
-        <>
-          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
-          <GameOverScreen />
-        </>
-      )}
+      {phase === "menu" && <TitleScreenImmersive isFullscreen={isFullscreen} onToggleFullscreen={toggle} isFullscreenSupported={isSupported} onStartRace={handleStartRace} boarding={boarding} onBoarded={handleBoarded} />}
+      {/* One scene for the whole run, so phase changes don't rebuild it */}
+      {phase !== "menu" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
+      {phase === "loading" && <LoadingScreen />}
+      {phase === "tutorial" && <Tutorial />}
+      {phase === "gameover" && <GameOverScreen />}
       <CountdownDisplay />
     </div>
   );

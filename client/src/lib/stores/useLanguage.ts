@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { storageGet, storageSet } from '@/lib/safeStorage';
 
 export type Language = 'en' | 'es';
 
@@ -9,7 +10,7 @@ interface LanguageState {
 }
 
 const getBrowserLanguage = (): Language => {
-  const browserLang = navigator.language.toLowerCase();
+  const browserLang = (navigator.language || 'en').toLowerCase();
   if (browserLang.startsWith('es')) {
     return 'es';
   }
@@ -24,6 +25,12 @@ export const useLanguage = create<LanguageState>()(
     }),
     {
       name: 'dream-nexus-language',
+      // Never let blocked storage break the game; the language just won't be remembered.
+      storage: createJSONStorage(() => ({
+        getItem: (key: string) => storageGet(key),
+        setItem: (key: string, value: string) => storageSet(key, value),
+        removeItem: () => {},
+      })),
     }
   )
 );

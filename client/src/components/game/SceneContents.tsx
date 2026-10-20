@@ -1,10 +1,11 @@
 import { useEffect, Suspense } from "react";
 import { Environment } from "./Environment";
-import { StartControlCore } from "./StartControlCore";
-import { StartControlDecor } from "./StartControlDecor";
+import { StartLine } from "./StartLine";
 import { SponsorBanners } from "./SponsorBanners";
 import { Road } from "./Road";
 import { BiomePropsScene } from "./BiomeProps";
+import { Vegetation } from "./Vegetation";
+import { SkidMarks, TyreSmoke } from "./TyreEffects";
 import { Car } from "./Car";
 import { Obstacles } from "./Obstacles";
 import { Collectibles } from "./Collectibles";
@@ -25,6 +26,8 @@ interface SceneContentsProps {
   carSpeedRef: React.MutableRefObject<number>;
   onCrash: () => void;
   onCollision: (obstacle: Obstacle) => void;
+  onNearMiss: (obstacle: Obstacle) => void;
+  impactCounter: number;
   onCollect: (collectible: { type: string }) => void;
   boostCounter: number;
   nitroActive: boolean;
@@ -39,6 +42,8 @@ export function SceneContents({
   carSpeedRef,
   onCrash,
   onCollision,
+  onNearMiss,
+  impactCounter,
   onCollect,
   boostCounter,
   nitroActive,
@@ -55,18 +60,18 @@ export function SceneContents({
 
   return (
     <>
-      <Environment />
+      <Environment carPositionRef={carPositionRef} />
       <Suspense fallback={null}>
-        <StartControlCore />
+        <StartLine />
       </Suspense>
       <Suspense fallback={null}>
-        <StartControlDecor />
-      </Suspense>
-      <Suspense fallback={null}>
-        <SponsorBanners />
+        <SponsorBanners carPositionRef={carPositionRef} />
       </Suspense>
       <Road carPositionRef={carPositionRef} />
       <BiomePropsScene carPositionRef={carPositionRef} />
+      <Vegetation carPositionRef={carPositionRef} />
+      <SkidMarks />
+      <TyreSmoke />
       <Car
         carPositionRef={carPositionRef}
         carSpeedRef={carSpeedRef}
@@ -74,11 +79,13 @@ export function SceneContents({
         boostCounter={boostCounter}
         nitroActive={nitroActive}
         puddleSlowdown={puddleSlowdownActive}
+        impactCounter={impactCounter}
       />
       <Obstacles
         carPositionRef={carPositionRef}
         carSpeedRef={carSpeedRef}
         onCollision={onCollision}
+        onNearMiss={onNearMiss}
       />
       <Collectibles
         carPositionRef={carPositionRef}
@@ -92,7 +99,7 @@ export function SceneContents({
       <ExhaustSmoke carPositionRef={carPositionRef} speedRef={carSpeedRef} />
       <CollisionSparks position={collisionSparkPosition} active={showCollisionSparks} />
       <AtmosphericParticles carPositionRef={carPositionRef} />
-      <Camera carPositionRef={carPositionRef} shakeIntensity={cameraShakeIntensity} />
+      <Camera carPositionRef={carPositionRef} carSpeedRef={carSpeedRef} shakeIntensity={cameraShakeIntensity} />
     </>
   );
 }
