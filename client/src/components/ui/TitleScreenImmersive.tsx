@@ -78,7 +78,7 @@ export function TitleScreenImmersive({
         {/* Brand */}
         <header className="dnr-brand">
           <div className="dnr-brand-kicker">
-            <img src="/dream-nexus-logo.png" alt="" />
+            <img src="./dream-nexus-logo.png" alt="" />
             <span>DREAM NEXUS</span>
           </div>
           <h1 className="dnr-brand-title">

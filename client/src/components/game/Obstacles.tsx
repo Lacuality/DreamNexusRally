@@ -119,7 +119,7 @@ export function Obstacles({ carPositionRef, carSpeedRef, onCollision, onNearMiss
 }
 
 function ObstacleModel({ obstacle }: { obstacle: Obstacle }) {
-  const { scene: coffeeSack } = useGLTF("/models/coffee-sack.glb");
+  const { scene: coffeeSack } = useGLTF("./models/coffee-sack.glb");
   
   const position: [number, number, number] = [
     obstacle.position.x,

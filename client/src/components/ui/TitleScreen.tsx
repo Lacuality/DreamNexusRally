@@ -125,7 +125,7 @@ export function TitleScreen() {
           {/* Logo */}
           <div style={{ justifySelf: "center", position: "relative" }}>
             <img
-              src="/dream-nexus-logo.png"
+              src="./dream-nexus-logo.png"
               alt="Dream Nexus"
               style={{
                 width: s.logo,
@@ -213,7 +213,7 @@ export function TitleScreen() {
             }}
           >
             <img
-              src="/pixel-bunny.png"
+              src="./pixel-bunny.png"
               alt="Pixel the Bunny"
               style={{
                 width: s.bunny,

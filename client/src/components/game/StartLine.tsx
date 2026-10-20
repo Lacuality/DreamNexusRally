@@ -375,11 +375,11 @@ function firstMesh(scene: THREE.Object3D) {
 }
 
 function Trackside() {
-  const { scene: barrier } = useGLTF("/models/safety-barrier.glb");
-  const { scene: spectators } = useGLTF("/models/spectators.glb");
-  const { scene: tent } = useGLTF("/models/control-tent.glb");
-  const { scene: van } = useGLTF("/models/service-van.glb");
-  const { scene: timing } = useGLTF("/models/timing-display.glb");
+  const { scene: barrier } = useGLTF("./models/safety-barrier.glb");
+  const { scene: spectators } = useGLTF("./models/spectators.glb");
+  const { scene: tent } = useGLTF("./models/control-tent.glb");
+  const { scene: van } = useGLTF("./models/service-van.glb");
+  const { scene: timing } = useGLTF("./models/timing-display.glb");
 
   const barrierMesh = useMemo(() => firstMesh(barrier), [barrier]);
   const crowdMesh = useMemo(() => firstMesh(spectators), [spectators]);

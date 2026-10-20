@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 
 function CarModel() {
-  const { scene } = useGLTF("/models/rally-car.glb");
+  const { scene } = useGLTF("./models/rally-car.glb");
   
   const carModel = useMemo(() => {
     const clonedScene = scene.clone();
