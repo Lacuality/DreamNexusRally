@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { GAME_CONFIG } from "@/lib/constants";
 import { useSettings } from "@/lib/stores/useSettings";
+import { useRally } from "@/lib/stores/useRally";
 import { CollectibleSparkles } from "./ParticleEffects";
 
 export type CollectibleType = "arequipe" | "nitro" | "shield";
@@ -24,9 +25,11 @@ export function Collectibles({ carPositionRef, onCollect }: CollectiblesProps) {
   const [nextCollectibleId, setNextCollectibleId] = useState(0);
   const [lastSpawnZ, setLastSpawnZ] = useState(0);
   const showPhotoMode = useSettings((state) => state.showPhotoMode);
+  const phase = useRally((state) => state.phase);
+  const isCountingDown = useRally((state) => state.isCountingDown);
   
   useFrame((state, delta) => {
-    if (showPhotoMode) return;
+    if (showPhotoMode || phase !== "playing" || isCountingDown) return;
     let newCollectibles = [...collectibles];
     let updatedLastSpawnZ = lastSpawnZ;
     let updatedNextId = nextCollectibleId;
@@ -79,10 +82,6 @@ export function Collectibles({ carPositionRef, onCollect }: CollectiblesProps) {
       return collectible.position.z > carPositionRef.current.z - 20;
     });
     
-    newCollectibles.forEach((collectible) => {
-      collectible.rotation += delta * 2;
-    });
-    
     if (newCollectibles.length !== collectibles.length || updatedLastSpawnZ !== lastSpawnZ) {
       setCollectibles(newCollectibles);
       setLastSpawnZ(updatedLastSpawnZ);
@@ -94,10 +93,29 @@ export function Collectibles({ carPositionRef, onCollect }: CollectiblesProps) {
     <group>
       {collectibles.map((collectible) => (
         <group key={collectible.id}>
-          <CollectibleModel collectible={collectible} />
+          <Spinner position={collectible.position} startAngle={collectible.rotation}>
+            <CollectibleModel collectible={{ ...collectible, position: ORIGIN, rotation: 0 }} />
+          </Spinner>
           <CollectibleSparkles position={collectible.position} />
         </group>
       ))}
+    </group>
+  );
+}
+
+const ORIGIN = new THREE.Vector3(0, 0, 0);
+
+// Spins and gently bobs a pickup so it reads as collectable from a distance.
+function Spinner({ position, startAngle, children }: { position: THREE.Vector3; startAngle: number; children: React.ReactNode }) {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((state, delta) => {
+    if (!ref.current) return;
+    ref.current.rotation.y += delta * 2;
+    ref.current.position.y = position.y + Math.sin(state.clock.elapsedTime * 3 + startAngle) * 0.12;
+  });
+  return (
+    <group ref={ref} position={[position.x, position.y, position.z]} rotation={[0, startAngle, 0]}>
+      {children}
     </group>
   );
 }

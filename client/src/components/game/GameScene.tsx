@@ -13,6 +13,12 @@ import { MobileControls } from "../ui/MobileControls";
 import { TuningPanel } from "../ui/TuningPanel";
 import { GAME_CONFIG } from "@/lib/constants";
 import { audioManager } from "@/lib/audio";
+import { vibrate } from "@/lib/haptics";
+import { ScorePopups } from "../ui/ScorePopups";
+
+// The physics tuning panel is a developer tool; open the game with ?tuning to show it.
+const SHOW_TUNING =
+  typeof window !== "undefined" && new URLSearchParams(window.location.search).has("tuning");
 
 function LoadingWatcher() {
   const { active, progress } = useProgress();
@@ -73,6 +79,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
   const carPositionRef = useRef(new THREE.Vector3(0, 0, 0));
   const carSpeedRef = useRef(0);
   const [boostCounter, setBoostCounter] = useState(0);
+  const [impactCounter, setImpactCounter] = useState(0);
   const [nitroActive, setNitroActive] = useState(false);
   const [shieldActive, setShieldActive] = useState(false);
   const [puddleSlowdownActive, setPuddleSlowdownActive] = useState(false);
@@ -90,6 +97,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
     pause,
     resume,
     addCollectible,
+    addNearMiss,
     finishLoading,
   } = useRally();
   const showPhotoMode = useSettings((state) => state.showPhotoMode);
@@ -109,6 +117,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
       setShieldActive(false);
       setPuddleSlowdownActive(false);
       setBoostCounter(0);
+      setImpactCounter(0);
       carPositionRef.current.set(0, 0, 0);
       carSpeedRef.current = 0;
     }
@@ -179,6 +188,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
 
     if (shieldActive) {
       console.log("Shield absorbed the hit!");
+      vibrate(60);
       setShieldActive(false);
       return;
     }
@@ -186,10 +196,13 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
     if (carSpeedRef.current > GAME_CONFIG.CRASH_SPEED_THRESHOLD) {
       console.log("High-speed crash! Game over.");
       audioManager.playCrash();
+      vibrate([120, 60, 200]);
       gameOver();
     } else {
-      console.log("Low-speed collision - speed penalty only");
+      console.log("Low-speed collision - speed penalty");
       audioManager.playCrash();
+      vibrate(80);
+      setImpactCounter((prev) => prev + 1);
     }
   };
 
@@ -198,6 +211,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
       console.log("Collected arequipe jar! +50 points, speed burst!");
       addCollectible();
       audioManager.playPickup();
+      vibrate(20);
       setBoostCounter((prev) => prev + 1);
     } else if (collectible.type === "nitro") {
       console.log("Collected nitro! +20% speed for 2 seconds!");
@@ -215,6 +229,11 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
       audioManager.playShield();
       setShieldActive(true);
     }
+  };
+
+  const handleNearMiss = () => {
+    addNearMiss();
+    vibrate(15);
   };
 
   const keyMap = [
@@ -252,6 +271,8 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
               carSpeedRef={carSpeedRef}
               onCrash={gameOver}
               onCollision={handleCollision}
+              onNearMiss={handleNearMiss}
+              impactCounter={impactCounter}
               onCollect={handleCollect}
               boostCounter={boostCounter}
               nitroActive={nitroActive}
@@ -277,7 +298,8 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
           onToggleFullscreen={onToggleFullscreen}
         />
       )}
-      {!showPhotoMode && phase === "playing" && <TuningPanel />}
+      {!showPhotoMode && phase === "playing" && <ScorePopups />}
+      {!showPhotoMode && phase === "playing" && SHOW_TUNING && <TuningPanel />}
       {!showPhotoMode && phase === "paused" && <PauseMenu />}
       {!showPhotoMode && <MobileControls />}
 

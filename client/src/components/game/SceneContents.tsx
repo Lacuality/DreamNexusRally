@@ -25,6 +25,8 @@ interface SceneContentsProps {
   carSpeedRef: React.MutableRefObject<number>;
   onCrash: () => void;
   onCollision: (obstacle: Obstacle) => void;
+  onNearMiss: (obstacle: Obstacle) => void;
+  impactCounter: number;
   onCollect: (collectible: { type: string }) => void;
   boostCounter: number;
   nitroActive: boolean;
@@ -39,6 +41,8 @@ export function SceneContents({
   carSpeedRef,
   onCrash,
   onCollision,
+  onNearMiss,
+  impactCounter,
   onCollect,
   boostCounter,
   nitroActive,
@@ -74,11 +78,13 @@ export function SceneContents({
         boostCounter={boostCounter}
         nitroActive={nitroActive}
         puddleSlowdown={puddleSlowdownActive}
+        impactCounter={impactCounter}
       />
       <Obstacles
         carPositionRef={carPositionRef}
         carSpeedRef={carSpeedRef}
         onCollision={onCollision}
+        onNearMiss={onNearMiss}
       />
       <Collectibles
         carPositionRef={carPositionRef}

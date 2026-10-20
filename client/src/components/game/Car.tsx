@@ -22,9 +22,10 @@ interface CarProps {
   boostCounter?: number;
   nitroActive?: boolean;
   puddleSlowdown?: boolean;
+  impactCounter?: number;
 }
 
-export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, nitroActive = false, puddleSlowdown = false }: CarProps) {
+export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, nitroActive = false, puddleSlowdown = false, impactCounter = 0 }: CarProps) {
   const carRef = useRef<THREE.Group>(null);
   const bodyRef = useRef<THREE.Group>(null);
   const carModelRef = useRef<THREE.Group>(null);
@@ -63,6 +64,7 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
   const lanePositionRef = useRef(0);
   const distanceRef = useRef(0);
   const lastBoostCounterRef = useRef(0);
+  const lastImpactCounterRef = useRef(0);
   const wheelRotationRef = useRef(0);
   const suspensionTimeRef = useRef(0);
   const lastBrakeSoundTimeRef = useRef(0);
@@ -129,6 +131,13 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
       targetSpeedRef.current = Math.min(maxSpeedMs, targetSpeedRef.current + boostMs);
       lastBoostCounterRef.current = boostCounter;
       console.log(`Speed boost applied! +${GAME_CONFIG.PICKUP_BURST} km/h`);
+    }
+    
+    // A low-speed knock costs half your speed.
+    if (impactCounter > lastImpactCounterRef.current) {
+      targetSpeedRef.current *= 0.5;
+      actualSpeedRef.current *= 0.5;
+      lastImpactCounterRef.current = impactCounter;
     }
     
     actualSpeedRef.current += (targetSpeedRef.current - actualSpeedRef.current) * 0.12;

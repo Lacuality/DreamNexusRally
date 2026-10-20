@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { GAME_CONFIG } from "@/lib/constants";
 import { useSettings } from "@/lib/stores/useSettings";
+import { useRally } from "@/lib/stores/useRally";
 
 interface Obstacle {
   id: number;
@@ -15,70 +16,99 @@ interface ObstaclesProps {
   carPositionRef: React.MutableRefObject<THREE.Vector3>;
   carSpeedRef: React.MutableRefObject<number>;
   onCollision: (obstacle: Obstacle) => void;
+  onNearMiss?: (obstacle: Obstacle) => void;
 }
 
-export function Obstacles({ carPositionRef, carSpeedRef, onCollision }: ObstaclesProps) {
+// Passing an obstacle this close (sideways, in metres) at speed counts as a near miss.
+const NEAR_MISS_DISTANCE = 2.2;
+const NEAR_MISS_MIN_SPEED_KMH = 80;
+
+export function Obstacles({ carPositionRef, carSpeedRef, onCollision, onNearMiss }: ObstaclesProps) {
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const [nextObstacleId, setNextObstacleId] = useState(0);
-  const [lastSpawnZ, setLastSpawnZ] = useState(0);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  // Per-frame counters live in refs so they don't re-render React every frame.
+  const nextIdRef = useRef(0);
+  const lastSpawnZRef = useRef(0);
+  const elapsedRef = useRef(0);
+  const passedRef = useRef(new Set<number>());
   const showPhotoMode = useSettings((state) => state.showPhotoMode);
-  
+  const phase = useRally((state) => state.phase);
+  const isCountingDown = useRally((state) => state.isCountingDown);
+
+  // Fresh road for every run.
+  useEffect(() => {
+    if (phase === "loading" || phase === "menu") {
+      setObstacles([]);
+      lastSpawnZRef.current = 0;
+      elapsedRef.current = 0;
+      passedRef.current.clear();
+    }
+  }, [phase]);
+
   useFrame((state, delta) => {
-    if (showPhotoMode) return;
-    
-    const newElapsedTime = elapsedTime + delta * 1000;
-    setElapsedTime(newElapsedTime);
-    
-    const distance = carPositionRef.current.z;
-    const difficultyLevel = Math.floor(newElapsedTime / GAME_CONFIG.DIFFICULTY_RAMP_INTERVAL);
-    const baseSpawnChance = GAME_CONFIG.OBSTACLE_DENSITY_BASE + 
+    if (showPhotoMode || phase !== "playing" || isCountingDown) return;
+
+    elapsedRef.current += delta * 1000;
+    const car = carPositionRef.current;
+    const distance = car.z;
+    const difficultyLevel = Math.floor(elapsedRef.current / GAME_CONFIG.DIFFICULTY_RAMP_INTERVAL);
+    const baseSpawnChance = GAME_CONFIG.OBSTACLE_DENSITY_BASE +
       (difficultyLevel * GAME_CONFIG.OBSTACLE_DENSITY_INCREASE);
-    
+
     const distanceFactor = Math.min(distance / 3000, 1.0);
     const spawnChance = baseSpawnChance + (distanceFactor * 0.25);
-    
     const minSpacing = Math.max(10 - distanceFactor * 4, 6);
-    
-    let newObstacles = [...obstacles];
-    let updatedLastSpawnZ = lastSpawnZ;
-    let updatedNextId = nextObstacleId;
-    
-    if (carPositionRef.current.z > lastSpawnZ + minSpacing) {
+
+    let next = obstacles;
+    let changed = false;
+
+    if (car.z > lastSpawnZRef.current + minSpacing) {
       if (Math.random() < spawnChance) {
         const laneOffset = (Math.random() - 0.5) * (GAME_CONFIG.LANE_WIDTH - 2);
-        const obstacleTypes: Array<"cone" | "rock" | "puddle" | "coffee_sack"> = ["cone", "rock", "puddle", "coffee_sack"];
+        const obstacleTypes: Array<Obstacle["type"]> = ["cone", "rock", "puddle", "coffee_sack"];
         const type = obstacleTypes[Math.floor(Math.random() * obstacleTypes.length)];
-        
-        newObstacles.push({
-          id: updatedNextId,
+        next = [...next, {
+          id: nextIdRef.current++,
           type,
-          position: new THREE.Vector3(laneOffset, 0, carPositionRef.current.z + 50)
-        });
-        
-        updatedNextId++;
+          position: new THREE.Vector3(laneOffset, 0, car.z + 50),
+        }];
+        changed = true;
       }
-      updatedLastSpawnZ = carPositionRef.current.z;
+      lastSpawnZRef.current = car.z;
     }
-    
-    newObstacles = newObstacles.filter((obstacle) => {
-      const distanceToCar = carPositionRef.current.distanceTo(obstacle.position);
-      
-      if (distanceToCar < GAME_CONFIG.HIT_RADIUS) {
+
+    const kept = next.filter((obstacle) => {
+      if (car.distanceTo(obstacle.position) < GAME_CONFIG.HIT_RADIUS) {
+        passedRef.current.delete(obstacle.id);
         onCollision(obstacle);
         return false;
       }
-      
-      return obstacle.position.z > carPositionRef.current.z - 20;
+
+      // Reward threading the needle past a solid obstacle at speed.
+      if (
+        onNearMiss &&
+        obstacle.type !== "puddle" &&
+        obstacle.position.z < car.z - 1 &&
+        !passedRef.current.has(obstacle.id)
+      ) {
+        passedRef.current.add(obstacle.id);
+        if (
+          Math.abs(obstacle.position.x - car.x) < NEAR_MISS_DISTANCE &&
+          carSpeedRef.current > NEAR_MISS_MIN_SPEED_KMH
+        ) {
+          onNearMiss(obstacle);
+        }
+      }
+
+      const keep = obstacle.position.z > car.z - 20;
+      if (!keep) passedRef.current.delete(obstacle.id);
+      return keep;
     });
-    
-    if (newObstacles.length !== obstacles.length || updatedLastSpawnZ !== lastSpawnZ) {
-      setObstacles(newObstacles);
-      setLastSpawnZ(updatedLastSpawnZ);
-      setNextObstacleId(updatedNextId);
+
+    if (changed || kept.length !== next.length) {
+      setObstacles(kept);
     }
   });
-  
+
   return (
     <group>
       {obstacles.map((obstacle) => (

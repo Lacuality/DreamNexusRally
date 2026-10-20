@@ -1,4 +1,4 @@
-import { useRally } from "@/lib/stores/useRally";
+import { useRally, liveScore } from "@/lib/stores/useRally";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 import { useState, useEffect } from "react";
@@ -11,7 +11,7 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ nitroActive = false, shieldActive = false, isFullscreen = false, onToggleFullscreen }: GameHUDProps = {}) {
-  const { distance, speed, highScore, collectiblesCount, pause } = useRally();
+  const { distance, speed, highScore, collectiblesCount, bonusPoints, combo, pause } = useRally();
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -60,7 +60,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
           <strong>{t.hud.arequipeJars}:</strong> {collectiblesCount}
         </div>
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.cyan }}>
-          <strong>{t.hud.score}:</strong> {Math.floor(distance) + collectiblesCount * 50}
+          <strong>{t.hud.score}:</strong> {liveScore(distance, collectiblesCount, bonusPoints)}{combo > 1 ? `  x${combo}` : ""}
         </div>
         <div style={{ color: DREAM_NEXUS_COLORS.white }}>
           <strong>{t.hud.highScore}:</strong> {highScore}

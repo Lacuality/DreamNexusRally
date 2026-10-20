@@ -22,19 +22,19 @@ export const translations = {
         },
         {
           title: "Controls",
-          description: "Desktop: Use Arrow Keys or WASD to steer left and right.\nMobile: Tap the on-screen buttons to control your car."
+          description: "Desktop: Up/W to accelerate, Down/S to brake, Left/Right or A/D to steer.\nMobile: Use the on-screen arrow buttons."
         },
         {
           title: "Puddles - Slowdown!",
-          description: "Yellow/brown puddles slow you down temporarily. Avoid them to maintain your speed and momentum."
+          description: "Blue puddles slow you down for a moment. Avoid them to keep your speed."
         },
         {
-          title: "Obstacles - Crash Warning!",
-          description: "Rocks, traffic cones, and coffee sacks will crash your car instantly. Dodge them to stay in the race!"
+          title: "Obstacles - Watch Your Speed!",
+          description: "Hitting a rock, cone or coffee sack above 150 km/h ends your race. Slower hits cut your speed in half. Pass close without touching for a +25 Close call bonus!"
         },
         {
-          title: "Power-Ups - Nitro Boost!",
-          description: "Collect glowing pickups for nitro speed boosts and extra points. They give you a temporary advantage!"
+          title: "Pickups & Combos",
+          description: "Red canisters give a nitro boost, shields absorb one hit, and arequipe jars are worth 50 points. Grab jars back to back for a combo of up to x5!"
         },
         {
           title: "You're All Set!",
@@ -54,7 +54,8 @@ export const translations = {
       pause: "Pause (P)",
       nitroBoost: "NITRO BOOST",
       shieldActive: "SHIELD ACTIVE",
-      photoMode: "Photo Mode (F2 to exit)"
+      photoMode: "Photo Mode (F2 to exit)",
+      closeCall: "Close call!"
     },
     
     pause: {
@@ -136,19 +137,19 @@ export const translations = {
         },
         {
           title: "Controles",
-          description: "Escritorio: Usa las flechas o WASD para girar izquierda y derecha.\nMóvil: Toca los botones en pantalla para controlar tu carro."
+          description: "Escritorio: Arriba/W para acelerar, Abajo/S para frenar, Izquierda/Derecha o A/D para girar.\nMóvil: Usa los botones de flechas en pantalla."
         },
         {
           title: "Charcos - ¡Reducción de Velocidad!",
-          description: "Los charcos amarillos/marrones te ralentizan temporalmente. Evítalos para mantener tu velocidad y ritmo."
+          description: "Los charcos azules te frenan por un momento. Evítalos para mantener tu velocidad."
         },
         {
-          title: "Obstáculos - ¡Advertencia de Choque!",
-          description: "Rocas, conos de tráfico y sacos de café chocarán tu carro al instante. ¡Esquívalos para seguir en la carrera!"
+          title: "Obstáculos - ¡Cuidado con la Velocidad!",
+          description: "Chocar contra una roca, un cono o un saco de café a más de 150 km/h termina tu carrera. A menor velocidad pierdes la mitad de tu velocidad. ¡Pasa cerca sin tocarlos para ganar +25 puntos extra!"
         },
         {
-          title: "Mejoras - ¡Impulso Nitro!",
-          description: "Recoge mejoras brillantes para impulsos de velocidad nitro y puntos extra. ¡Te dan una ventaja temporal!"
+          title: "Mejoras y Combos",
+          description: "Los cilindros rojos dan nitro, los escudos aguantan un golpe y los frascos de arequipe valen 50 puntos. ¡Recoge frascos seguidos para un combo de hasta x5!"
         },
         {
           title: "¡Todo Listo!",
@@ -168,7 +169,8 @@ export const translations = {
       pause: "Pausa (P)",
       nitroBoost: "IMPULSO NITRO",
       shieldActive: "ESCUDO ACTIVO",
-      photoMode: "Modo Foto (F2 para salir)"
+      photoMode: "Modo Foto (F2 para salir)",
+      closeCall: "¡Por poco!"
     },
     
     pause: {

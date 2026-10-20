@@ -2,6 +2,37 @@ import { create } from "zustand";
 import { subscribeWithSelector } from "zustand/middleware";
 import { audioManager } from "@/lib/audio";
 
+export interface ScorePopup {
+  id: number;
+  text: string;
+  color: string;
+  label?: "closeCall";
+}
+
+// Jars picked up within this window keep the combo going.
+const COMBO_WINDOW_MS = 4000;
+const MAX_COMBO = 5;
+export const NEAR_MISS_POINTS = 25;
+
+let popupId = 0;
+
+// Browser storage can be blocked (private mode, embedded pages); never let that crash the game.
+function readStorage(key: string): string | null {
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function writeStorage(key: string, value: string) {
+  try { localStorage.setItem(key, value); } catch { /* ignore */ }
+}
+
+// Per-run scoring state, cleared at the start of every race.
+function freshRunStats() {
+  return { bonusPoints: 0, combo: 0, lastJarTime: 0, popups: [] as ScorePopup[] };
+}
+
+export function liveScore(distance: number, jars: number, bonus: number) {
+  return Math.floor(distance) + jars * 50 + bonus;
+}
+
 export type RallyPhase = "menu" | "loading" | "tutorial" | "playing" | "paused" | "gameover";
 
 interface RallyState {
@@ -17,7 +48,14 @@ interface RallyState {
   countdown: number;
   isCountingDown: boolean;
   tutorialReturnPhase: RallyPhase | null;
+  bonusPoints: number;
+  combo: number;
+  lastJarTime: number;
+  popups: ScorePopup[];
   
+  addNearMiss: () => void;
+  addPopup: (text: string, color: string, label?: ScorePopup["label"]) => void;
+
   start: () => void;
   pause: () => void;
   resume: () => void;
@@ -46,6 +84,7 @@ export const useRally = create<RallyState>()(
     highScore: 0,
     currentScore: 0,
     collectiblesCount: 0,
+        ...freshRunStats(),
     startTime: 0,
     playerName: "",
     scoreSubmitted: false,
@@ -61,6 +100,7 @@ export const useRally = create<RallyState>()(
         speed: 0,
         currentScore: 0,
         collectiblesCount: 0,
+        ...freshRunStats(),
         isCountingDown: false,
         countdown: 3
       });
@@ -122,6 +162,7 @@ export const useRally = create<RallyState>()(
         speed: 0,
         currentScore: 0,
         collectiblesCount: 0,
+        ...freshRunStats(),
         startTime: now
       });
     },
@@ -144,6 +185,7 @@ export const useRally = create<RallyState>()(
         speed: 0,
         currentScore: 0,
         collectiblesCount: 0,
+        ...freshRunStats(),
         startTime: now,
         isCountingDown: false
       });
@@ -160,11 +202,11 @@ export const useRally = create<RallyState>()(
     gameOver: () => {
       const state = get();
       if (state.phase === "playing") {
-        const finalScore = Math.floor(state.distance) + (state.collectiblesCount * 50);
+        const finalScore = liveScore(state.distance, state.collectiblesCount, state.bonusPoints);
         const newHighScore = Math.max(finalScore, state.highScore);
         
         if (newHighScore > state.highScore) {
-          localStorage.setItem("dreamNexusRallyHighScore", String(newHighScore));
+          writeStorage("dreamNexusRallyHighScore", String(newHighScore));
         }
         
         audioManager.stopEngineSound();
@@ -200,7 +242,8 @@ export const useRally = create<RallyState>()(
     
     restart: () => {
       audioManager.playBackgroundMusic();
-      set({ phase: "menu", distance: 0, speed: 0, currentScore: 0, collectiblesCount: 0, scoreSubmitted: false });
+      set({ phase: "menu", distance: 0, speed: 0, currentScore: 0, collectiblesCount: 0,
+        ...freshRunStats(), scoreSubmitted: false });
     },
     
     updateDistance: (distance: number) => {
@@ -212,14 +255,36 @@ export const useRally = create<RallyState>()(
     },
     
     addCollectible: () => {
-      set((state) => ({
+      const now = Date.now();
+      const state = get();
+      const combo = now - state.lastJarTime < COMBO_WINDOW_MS ? Math.min(state.combo + 1, MAX_COMBO) : 1;
+      const points = 50 * combo;
+      set({
         collectiblesCount: state.collectiblesCount + 1,
-        currentScore: state.currentScore + 50
-      }));
+        currentScore: state.currentScore + points,
+        // Base 50 per jar is counted from collectiblesCount; the combo extra goes to bonus.
+        bonusPoints: state.bonusPoints + (points - 50),
+        combo,
+        lastJarTime: now,
+      });
+      get().addPopup(combo > 1 ? `+${points}  x${combo}` : `+${points}`, "#FDC6B5");
+    },
+
+    addNearMiss: () => {
+      set((state) => ({ bonusPoints: state.bonusPoints + NEAR_MISS_POINTS }));
+      get().addPopup(`+${NEAR_MISS_POINTS}`, "#24A0CE", "closeCall");
+    },
+
+    addPopup: (text: string, color: string, label?: ScorePopup["label"]) => {
+      const id = ++popupId;
+      set((state) => ({ popups: [...state.popups.slice(-3), { id, text, color, label }] }));
+      setTimeout(() => {
+        set((state) => ({ popups: state.popups.filter((p) => p.id !== id) }));
+      }, 1200);
     },
     
     loadHighScore: () => {
-      const saved = localStorage.getItem("dreamNexusRallyHighScore");
+      const saved = readStorage("dreamNexusRallyHighScore");
       const highScore = saved ? parseInt(saved, 10) : 0;
       set({ highScore });
     },
@@ -227,17 +292,17 @@ export const useRally = create<RallyState>()(
     saveHighScore: () => {
       const { currentScore, highScore } = get();
       const newHighScore = Math.max(currentScore, highScore);
-      localStorage.setItem("dreamNexusRallyHighScore", String(newHighScore));
+      writeStorage("dreamNexusRallyHighScore", String(newHighScore));
       set({ highScore: newHighScore });
     },
     
     setPlayerName: (name: string) => {
       set({ playerName: name });
-      localStorage.setItem("dreamNexusRallyPlayerName", name);
+      writeStorage("dreamNexusRallyPlayerName", name);
     },
     
     loadPlayerName: () => {
-      const saved = localStorage.getItem("dreamNexusRallyPlayerName");
+      const saved = readStorage("dreamNexusRallyPlayerName");
       if (saved) {
         set({ playerName: saved });
       }
