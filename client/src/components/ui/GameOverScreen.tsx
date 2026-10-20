@@ -32,7 +32,8 @@ export function GameOverScreen() {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
+        // "safe" keeps the top visible when the content is taller than a phone screen.
+        justifyContent: "safe center",
         zIndex: 1000,
         fontFamily: "monospace",
         color: DREAM_NEXUS_COLORS.white,

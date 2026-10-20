@@ -59,7 +59,7 @@ export function SceneContents({
 
   return (
     <>
-      <Environment />
+      <Environment carPositionRef={carPositionRef} />
       <Suspense fallback={null}>
         <StartControlCore />
       </Suspense>
@@ -98,7 +98,7 @@ export function SceneContents({
       <ExhaustSmoke carPositionRef={carPositionRef} speedRef={carSpeedRef} />
       <CollisionSparks position={collisionSparkPosition} active={showCollisionSparks} />
       <AtmosphericParticles carPositionRef={carPositionRef} />
-      <Camera carPositionRef={carPositionRef} shakeIntensity={cameraShakeIntensity} />
+      <Camera carPositionRef={carPositionRef} carSpeedRef={carSpeedRef} shakeIntensity={cameraShakeIntensity} />
     </>
   );
 }

@@ -234,6 +234,9 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
   const handleNearMiss = () => {
     addNearMiss();
     vibrate(15);
+    // Small nudge: a close call should register, but far less than a crash.
+    setCameraShakeIntensity(0.3);
+    setTimeout(() => setCameraShakeIntensity(0), 150);
   };
 
   const keyMap = [
@@ -301,7 +304,8 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
       {!showPhotoMode && phase === "playing" && <ScorePopups />}
       {!showPhotoMode && phase === "playing" && SHOW_TUNING && <TuningPanel />}
       {!showPhotoMode && phase === "paused" && <PauseMenu />}
-      {!showPhotoMode && <MobileControls />}
+      {/* Touch controls only while racing, so they never cover menus or the tutorial */}
+      {!showPhotoMode && phase === "playing" && <MobileControls />}
 
       {showPhotoMode && (
         <div

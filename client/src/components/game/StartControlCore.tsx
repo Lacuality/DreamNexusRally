@@ -55,8 +55,8 @@ export function StartControlCore() {
         <meshStandardMaterial color="#FFFFFF" />
       </mesh>
 
-      <pointLight position={[-3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
-      <pointLight position={[3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
+      <pointLight position={[-3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" />
+      <pointLight position={[3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" />
       <pointLight position={[0, 4, startLineZ + 5]} intensity={150} distance={12} color="#FFEECC" />
       
       <Text

@@ -175,8 +175,8 @@ export function StartControl() {
         </mesh>
       ))}
 
-      <pointLight position={[-3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
-      <pointLight position={[3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" castShadow />
+      <pointLight position={[-3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" />
+      <pointLight position={[3, 5, startLineZ]} intensity={200} distance={15} color="#FFFFFF" />
       <pointLight position={[0, 4, startLineZ + 5]} intensity={150} distance={12} color="#FFEECC" />
       
       <pointLight position={[laneWidth / 2 + 3.5, 3, startLineZ - 2]} intensity={80} distance={8} color="#FF6B6B" />

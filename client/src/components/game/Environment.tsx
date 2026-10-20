@@ -36,15 +36,15 @@ function fbm(x: number, y: number, octaves = 4, falloff = 0.5) {
   return sum / norm;
 }
 
-export function Environment() {
+export function Environment({ carPositionRef }: { carPositionRef?: React.MutableRefObject<THREE.Vector3> } = {}) {
   const updateTransition = useBiome((s) => s.updateTransition);
   useFrame((_, delta) => updateTransition(delta));
   return (
     <>
       <Sky />
       <SkyAndFog />
-      <Lights />
-      <Terrain />
+      <Lights carPositionRef={carPositionRef} />
+      <Terrain carPositionRef={carPositionRef} />
       <BackgroundSilhouette />
     </>
   );
@@ -86,7 +86,23 @@ function SkyAndFog() {
 }
 
 /** ---------- Lights (sun + fill + rim), biome-aware intensities */
-function Lights() {
+// Phones get a smaller shadow map; it is one of the most expensive parts of a frame.
+const SHADOW_MAP_SIZE = typeof window !== "undefined" && window.innerWidth < 768 ? 1024 : 2048;
+const SUN_OFFSET = new THREE.Vector3(12, 18, 8);
+
+function Lights({ carPositionRef }: { carPositionRef?: React.MutableRefObject<THREE.Vector3> }) {
+  const sunRef = useRef<THREE.DirectionalLight>(null);
+
+  // Keep the sun (and its shadow box) centred on the car, or shadows stop after the start line.
+  useFrame(() => {
+    const light = sunRef.current;
+    const car = carPositionRef?.current;
+    if (!light || !car) return;
+    light.position.set(car.x + SUN_OFFSET.x, SUN_OFFSET.y, car.z + SUN_OFFSET.z);
+    light.target.position.set(car.x, 0, car.z);
+    light.target.updateMatrixWorld();
+  });
+
   const weather = useSettings((s) => s.weather);
   const current = useBiome((s) => s.getCurrentConfig());
   const prev = useBiome((s) => s.getPreviousConfig());
@@ -110,11 +126,12 @@ function Lights() {
       <hemisphereLight intensity={0.25} color={"#8fbcd4"} groundColor={"#3b4b3e"} />
       <ambientLight intensity={amb} />
       <directionalLight
+        ref={sunRef}
         position={[12, 18, 8]}
         intensity={sun}
         castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
+        shadow-mapSize-width={SHADOW_MAP_SIZE}
+        shadow-mapSize-height={SHADOW_MAP_SIZE}
         shadow-camera-far={120}
         shadow-camera-left={-40}
         shadow-camera-right={40}
@@ -128,39 +145,71 @@ function Lights() {
 }
 
 /** ---------- Terrain: wide rolling hills with FBM noise, biome-tinted */
-function Terrain() {
+// Terrain sheet size, and how far it is re-centred ahead of the car each time it moves.
+const TERRAIN_W = 220;
+const TERRAIN_L = 520;
+const TERRAIN_STEP = 40;
+const TERRAIN_AHEAD = 150;
+const TERRAIN_Y = -0.6;
+
+/** Ground height (relative to TERRAIN_Y) at a world position. */
+function terrainHeight(x: number, worldZ: number) {
+  // gentle FBM hills; tuned to be road-friendly (no cliffs next to road)
+  const base = fbm((x + 1000) * 0.015, (worldZ + 1000) * 0.02, 4, 0.55); // 0..1
+  const ridge = fbm((x - 50) * 0.006, (worldZ + 200) * 0.006, 3, 0.5);
+  const hills = (base * 3.2 + ridge * 1.2) - 2.6;
+
+  // Keep a flat verge just under the road so grass never pokes through it,
+  // then blend into the hills further out.
+  const verge = 0.45; // world height -0.15, below the road surface at 0
+  const d = Math.abs(x);
+  if (d < 7) return verge;
+  if (d > 15) return hills;
+  const t = (d - 7) / 8;
+  const smooth = t * t * (3 - 2 * t);
+  return verge + (hills - verge) * smooth;
+}
+
+/** ---------- Terrain: wide rolling hills with FBM noise, biome-tinted.
+ *  It follows the car in steps, so the ground never runs out. */
+function Terrain({ carPositionRef }: { carPositionRef?: React.MutableRefObject<THREE.Vector3> }) {
   const current = useBiome((s) => s.getCurrentConfig());
   const prev = useBiome((s) => s.getPreviousConfig());
   const t = useBiome((s) => s.transitionProgress);
   const isX = useBiome((s) => s.isTransitioning);
+  const meshRef = useRef<THREE.Mesh>(null);
+  const centerRef = useRef<number | null>(null);
 
   // blend terrain colors across biomes
   let terrainColor = current.terrainColor;
   if (isX && prev) terrainColor = lerpColor(prev.terrainColor, current.terrainColor, t);
 
-  // one big ground sheet so you always see “land” under the road
-  const geo = useMemo(() => {
-    const w = 220, h = 520, wSeg = 90, hSeg = 180;
-    const g = new THREE.PlaneGeometry(w, h, wSeg, hSeg);
-    const p = g.attributes.position as THREE.BufferAttribute;
+  const geo = useMemo(() => new THREE.PlaneGeometry(TERRAIN_W, TERRAIN_L, 90, 180), []);
 
+  // Heights are sampled in world space, so the hills stay put when the sheet moves.
+  const rebuild = (centerZ: number) => {
+    const p = geo.attributes.position as THREE.BufferAttribute;
     for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i);
-      const y = p.getY(i);
-
-      // gentle FBM hills; tuned to be road-friendly (no cliffs next to road)
-      const base = fbm((x + 1000) * 0.015, (y + 1000) * 0.02, 4, 0.55); // 0..1
-      const ridge = fbm((x - 50) * 0.006, (y + 200) * 0.006, 3, 0.5);
-      const height = (base * 3.2 + ridge * 1.2) - 2.6;
-
-      p.setZ(i, height);
+      // The sheet is rotated -90 degrees about X: local y maps to world -z.
+      p.setZ(i, terrainHeight(p.getX(i), centerZ - p.getY(i)));
     }
-    g.computeVertexNormals();
-    return g;
-  }, []);
+    p.needsUpdate = true;
+    geo.computeVertexNormals();
+    geo.computeBoundingSphere();
+  };
+
+  useFrame(() => {
+    const carZ = carPositionRef?.current.z ?? 0;
+    const center = Math.round((carZ + TERRAIN_AHEAD) / TERRAIN_STEP) * TERRAIN_STEP;
+    if (center !== centerRef.current) {
+      centerRef.current = center;
+      rebuild(center);
+      if (meshRef.current) meshRef.current.position.z = center;
+    }
+  });
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.6, 60]} receiveShadow>
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, TERRAIN_Y, TERRAIN_AHEAD]} receiveShadow>
       <primitive object={geo} />
       <meshStandardMaterial color={terrainColor} roughness={0.95} metalness={0.02} />
     </mesh>
