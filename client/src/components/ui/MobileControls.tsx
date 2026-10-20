@@ -4,7 +4,7 @@ import { useMobileControls } from "@/lib/stores/useMobileControls";
 
 export function MobileControls() {
   const isMobile = useIsMobile();
-  const { setLeft, setRight, setForward, setBack } = useMobileControls();
+  const { setLeft, setRight, setForward, setBack, setHandbrake } = useMobileControls();
   
   if (!isMobile) return null;
   
@@ -50,6 +50,7 @@ export function MobileControls() {
           style={buttonStyle}
           onTouchStart={() => setLeft(true)}
           onTouchEnd={() => setLeft(false)}
+          onTouchCancel={() => setLeft(false)}
         >
           ←
         </div>
@@ -57,6 +58,7 @@ export function MobileControls() {
           style={buttonStyle}
           onTouchStart={() => setRight(true)}
           onTouchEnd={() => setRight(false)}
+          onTouchCancel={() => setRight(false)}
         >
           →
         </div>
@@ -77,6 +79,7 @@ export function MobileControls() {
           style={buttonStyle}
           onTouchStart={() => setForward(true)}
           onTouchEnd={() => setForward(false)}
+          onTouchCancel={() => setForward(false)}
         >
           ↑
         </div>
@@ -84,9 +87,33 @@ export function MobileControls() {
           style={buttonStyle}
           onTouchStart={() => setBack(true)}
           onTouchEnd={() => setBack(false)}
+          onTouchCancel={() => setBack(false)}
         >
           ↓
         </div>
+      </div>
+
+      {/* Handbrake, next to the brake: hold it while steering to throw the car into a drift */}
+      <div
+        style={{
+          ...buttonStyle,
+          position: "absolute",
+          bottom: "40px",
+          right: "125px",
+          width: "64px",
+          height: "64px",
+          fontSize: "12px",
+          letterSpacing: "0.05em",
+          backgroundColor: "rgba(253, 198, 181, 0.75)",
+          border: `3px solid ${DREAM_NEXUS_COLORS.warm}`,
+          color: DREAM_NEXUS_COLORS.navy,
+          pointerEvents: "auto",
+        }}
+        onTouchStart={() => setHandbrake(true)}
+        onTouchEnd={() => setHandbrake(false)}
+        onTouchCancel={() => setHandbrake(false)}
+      >
+        DRIFT
       </div>
     </div>
   );

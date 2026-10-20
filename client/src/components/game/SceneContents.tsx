@@ -5,6 +5,7 @@ import { SponsorBanners } from "./SponsorBanners";
 import { Road } from "./Road";
 import { BiomePropsScene } from "./BiomeProps";
 import { Vegetation } from "./Vegetation";
+import { SkidMarks, TyreSmoke } from "./TyreEffects";
 import { Car } from "./Car";
 import { Obstacles } from "./Obstacles";
 import { Collectibles } from "./Collectibles";
@@ -69,6 +70,8 @@ export function SceneContents({
       <Road carPositionRef={carPositionRef} />
       <BiomePropsScene carPositionRef={carPositionRef} />
       <Vegetation carPositionRef={carPositionRef} />
+      <SkidMarks />
+      <TyreSmoke />
       <Car
         carPositionRef={carPositionRef}
         carSpeedRef={carSpeedRef}

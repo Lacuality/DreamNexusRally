@@ -7,12 +7,15 @@ import { useRally } from "@/lib/stores/useRally";
 import { useMobileControls } from "@/lib/stores/useMobileControls";
 import { useSettings } from "@/lib/stores/useSettings";
 import { audioManager } from "@/lib/audio";
+import { vibrate } from "@/lib/haptics";
+import { carTelemetry, createCarState, stepCar, type CarState } from "@/lib/carPhysics";
 
 export enum Controls {
   forward = "forward",
   back = "back",
   left = "left",
   right = "right",
+  handbrake = "handbrake",
 }
 
 interface CarProps {
@@ -57,17 +60,14 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
     };
   }, [wheelScene]);
   
-  const targetSpeedRef = useRef(0);
-  const actualSpeedRef = useRef(0);
-  const yawVelocityRef = useRef(0);
-  const carYawRef = useRef(0);
-  const lanePositionRef = useRef(0);
-  const distanceRef = useRef(0);
+  // Physics state lives in a ref: it changes every frame and must not re-render React.
+  const physicsRef = useRef<CarState>(createCarState());
   const lastBoostCounterRef = useRef(0);
   const lastImpactCounterRef = useRef(0);
   const wheelRotationRef = useRef(0);
   const suspensionTimeRef = useRef(0);
   const lastBrakeSoundTimeRef = useRef(0);
+  const lastWallHitRef = useRef(0);
   
   const [, getKeys] = useKeyboardControls<Controls>();
   const phase = useRally((state) => state.phase);
@@ -75,6 +75,13 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
   const mobileControls = useMobileControls();
   const showPhotoMode = useSettings((state) => state.showPhotoMode);
   
+  // Front wheels steer (about Y) and then spin about their steered axle, so apply Y before X.
+  useEffect(() => {
+    for (const ref of [frontLeftWheelRef, frontRightWheelRef, rearLeftWheelRef, rearRightWheelRef]) {
+      if (ref.current) ref.current.rotation.order = "YXZ";
+    }
+  }, []);
+
   useEffect(() => {
     const controls = getKeys();
     console.log("Keyboard controls initialized:", {
@@ -96,103 +103,93 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
   
   useFrame((state, delta) => {
     if (!carRef.current || phase !== "playing" || showPhotoMode) return;
-    
+
     const keys = getKeys();
-    const isForward = !isCountingDown && (keys.forward || mobileControls.forward);
-    const isBack = !isCountingDown && (keys.back || mobileControls.back);
-    const isLeft = !isCountingDown && (keys.left || mobileControls.left);
-    const isRight = !isCountingDown && (keys.right || mobileControls.right);
-    
-    const maxSpeedMs = nitroActive ? GAME_CONFIG.MAX_SPEED_MS * 1.2 : GAME_CONFIG.MAX_SPEED_MS;
-    const accelInput = isForward ? 1 : 0;
-    const brakeInput = isBack ? 1 : 0;
-    const steerInput = (isLeft ? 1 : 0) + (isRight ? -1 : 0);
-    
-    if (brakeInput > 0 && actualSpeedRef.current * 3.6 > 15 && state.clock.elapsedTime - lastBrakeSoundTimeRef.current > 0.2) {
+    const input = {
+      throttle: !isCountingDown && (keys.forward || mobileControls.forward),
+      brake: !isCountingDown && (keys.back || mobileControls.back),
+      left: keys.left || mobileControls.left,
+      right: keys.right || mobileControls.right,
+      handbrake: !isCountingDown && (!!keys.handbrake || mobileControls.handbrake),
+    };
+
+    let car = physicsRef.current;
+
+    // Arequipe jar: a little shove forward.
+    if (boostCounter > lastBoostCounterRef.current) {
+      car = { ...car, speed: car.speed + GAME_CONFIG.PICKUP_BURST / 3.6 };
+      lastBoostCounterRef.current = boostCounter;
+    }
+    // A low-speed knock costs half your speed.
+    if (impactCounter > lastImpactCounterRef.current) {
+      car = { ...car, speed: car.speed * 0.5 };
+      lastImpactCounterRef.current = impactCounter;
+    }
+
+    car = stepCar(car, input, { nitro: nitroActive, puddle: puddleSlowdown, frozen: isCountingDown }, delta);
+    physicsRef.current = car;
+
+    const speedKmh = car.speed * 3.6;
+
+    carTelemetry.x = car.x;
+    carTelemetry.z = car.z;
+    carTelemetry.heading = car.heading;
+    carTelemetry.speed = car.speed;
+    carTelemetry.slip = car.slip;
+    carTelemetry.hardBraking = input.brake && speedKmh > 25;
+    carTelemetry.handbrake = input.handbrake;
+    carTelemetry.onGrass = car.onGrass;
+
+    // Tyre screech when sliding, braking hard or grinding the barrier.
+    const screech =
+      (Math.abs(car.slip) > 0.12 && car.speed > 12) ||
+      (input.brake && speedKmh > 25) ||
+      car.hitWall;
+    if (screech && state.clock.elapsedTime - lastBrakeSoundTimeRef.current > 0.22) {
       audioManager.playBrake();
       lastBrakeSoundTimeRef.current = state.clock.elapsedTime;
     }
-    
-    targetSpeedRef.current += (accelInput * GAME_CONFIG.ACCEL_RATE - brakeInput * GAME_CONFIG.BRAKE_RATE) * delta;
-    
-    if (nitroActive && targetSpeedRef.current < maxSpeedMs) {
-      targetSpeedRef.current = Math.min(maxSpeedMs, targetSpeedRef.current + GAME_CONFIG.ACCEL_RATE * delta * 0.5);
+    if (car.hitWall && state.clock.elapsedTime - lastWallHitRef.current > 0.5) {
+      vibrate(40);
+      lastWallHitRef.current = state.clock.elapsedTime;
     }
-    
-    if (puddleSlowdown) {
-      targetSpeedRef.current *= Math.pow(0.85, delta / (1/60));
-      actualSpeedRef.current *= Math.pow(0.90, delta / (1/60));
-    }
-    
-    targetSpeedRef.current = Math.max(0, Math.min(targetSpeedRef.current, maxSpeedMs));
-    
-    if (boostCounter > lastBoostCounterRef.current) {
-      const boostMs = GAME_CONFIG.PICKUP_BURST / 3.6;
-      targetSpeedRef.current = Math.min(maxSpeedMs, targetSpeedRef.current + boostMs);
-      lastBoostCounterRef.current = boostCounter;
-      console.log(`Speed boost applied! +${GAME_CONFIG.PICKUP_BURST} km/h`);
-    }
-    
-    // A low-speed knock costs half your speed.
-    if (impactCounter > lastImpactCounterRef.current) {
-      targetSpeedRef.current *= 0.5;
-      actualSpeedRef.current *= 0.5;
-      lastImpactCounterRef.current = impactCounter;
-    }
-    
-    actualSpeedRef.current += (targetSpeedRef.current - actualSpeedRef.current) * 0.12;
-    
-    const speedFactor = 0.7 + 0.3 * (actualSpeedRef.current / maxSpeedMs);
-    const targetYaw = steerInput * GAME_CONFIG.STEER_STRENGTH * speedFactor;
-    yawVelocityRef.current += (targetYaw - yawVelocityRef.current) * 0.15;
-    carYawRef.current += yawVelocityRef.current * delta;
-    
-    const yawDamping = Math.pow(0.92, delta / (1/60));
-    carYawRef.current *= yawDamping;
-    
-    lanePositionRef.current += Math.sin(carYawRef.current) * actualSpeedRef.current * delta * 0.8;
-    lanePositionRef.current = Math.max(
-      -GAME_CONFIG.LANE_WIDTH / 2 + 0.5,
-      Math.min(GAME_CONFIG.LANE_WIDTH / 2 - 0.5, lanePositionRef.current)
-    );
-    
-    const isOffRoad = Math.abs(lanePositionRef.current) > GAME_CONFIG.LANE_WIDTH / 2 - 1;
-    if (isOffRoad) {
-      const offRoadDrag = Math.pow(GAME_CONFIG.OFFROAD_DRAG, delta / (1/60));
-      actualSpeedRef.current *= offRoadDrag;
-      targetSpeedRef.current *= offRoadDrag;
-    }
-    
-    distanceRef.current += actualSpeedRef.current * delta;
-    
+
+    /* ---- Wheels: spin with speed, front pair steers ---- */
     const wheelRadius = 0.15;
-    const angularVelocity = actualSpeedRef.current / wheelRadius;
-    wheelRotationRef.current += angularVelocity * delta;
-    
-    if (frontLeftWheelRef.current) frontLeftWheelRef.current.rotation.x = wheelRotationRef.current;
-    if (frontRightWheelRef.current) frontRightWheelRef.current.rotation.x = wheelRotationRef.current;
-    if (rearLeftWheelRef.current) rearLeftWheelRef.current.rotation.x = wheelRotationRef.current;
-    if (rearRightWheelRef.current) rearRightWheelRef.current.rotation.x = wheelRotationRef.current;
-    
-    suspensionTimeRef.current += delta;
-    const baseMaxSpeed = GAME_CONFIG.MAX_SPEED_MS;
-    const suspensionBob = Math.sin(suspensionTimeRef.current * 8 + actualSpeedRef.current * 0.5) * 0.03 * (actualSpeedRef.current / baseMaxSpeed);
-    
-    const targetBodyRoll = steerInput * THREE.MathUtils.degToRad(4);
-    if (bodyRef.current) {
-      bodyRef.current.rotation.z += (targetBodyRoll - bodyRef.current.rotation.z) * delta * 6;
-      bodyRef.current.position.y = suspensionBob;
+    wheelRotationRef.current += (car.speed / wheelRadius) * Math.min(delta, 0.1);
+    const steerAngle = (0.55 * car.steer) / (1 + car.speed / 20);
+    for (const ref of [frontLeftWheelRef, frontRightWheelRef]) {
+      if (ref.current) {
+        ref.current.rotation.y = steerAngle;
+        ref.current.rotation.x = wheelRotationRef.current;
+      }
     }
-    
-    carRef.current.position.x = lanePositionRef.current;
-    carRef.current.position.z = distanceRef.current;
-    carRef.current.rotation.y = -carYawRef.current * 0.3;
-    
-    const speedKmh = actualSpeedRef.current * 3.6;
+    for (const ref of [rearLeftWheelRef, rearRightWheelRef]) {
+      if (ref.current) ref.current.rotation.x = wheelRotationRef.current;
+    }
+
+    /* ---- Body: roll in corners, squat/dive under throttle/brakes, bumps on grass ---- */
+    suspensionTimeRef.current += delta;
+    if (bodyRef.current) {
+      const k = 1 - Math.exp(-8 * Math.min(delta, 0.1));
+      const targetRoll = THREE.MathUtils.clamp(-car.lateralAccel * 0.012, -0.12, 0.12);
+      const targetPitch = THREE.MathUtils.clamp(-car.longitudinalAccel * 0.006, -0.06, 0.06);
+      bodyRef.current.rotation.z += (targetRoll - bodyRef.current.rotation.z) * k;
+      bodyRef.current.rotation.x += (targetPitch - bodyRef.current.rotation.x) * k;
+      const roughness = car.onGrass ? 0.06 : 0.015;
+      bodyRef.current.position.y =
+        Math.sin(suspensionTimeRef.current * (car.onGrass ? 23 : 9) + car.z * 0.7) * roughness * Math.min(car.speed / 20, 1);
+    }
+
+    /* ---- Place the car: it points where its nose points, and travels along its velocity ---- */
+    carRef.current.position.x = car.x;
+    carRef.current.position.z = car.z;
+    carRef.current.rotation.y = car.heading;
+
     carSpeedRef.current = speedKmh;
     carPositionRef.current.copy(carRef.current.position);
-    
-    audioManager.updateEngineSound(speedKmh, brakeInput > 0);
+
+    audioManager.updateEngineSound(speedKmh, input.brake);
   });
   
   return (

@@ -244,6 +244,7 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
     { name: Controls.back, keys: ["ArrowDown", "KeyS"] },
     { name: Controls.left, keys: ["ArrowLeft", "KeyA"] },
     { name: Controls.right, keys: ["ArrowRight", "KeyD"] },
+    { name: Controls.handbrake, keys: ["Space"] },
   ];
 
   return (

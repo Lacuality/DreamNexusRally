@@ -22,7 +22,7 @@ export const translations = {
         },
         {
           title: "Controls",
-          description: "Desktop: Up/W to accelerate, Down/S to brake, Left/Right or A/D to steer.\nMobile: Use the on-screen arrow buttons."
+          description: "Desktop: Up/W to accelerate, Down/S to brake, Left/Right or A/D to steer, Space for the handbrake.\nMobile: arrow buttons, plus DRIFT for the handbrake. Ease off the throttle and the car slows down, just like a real car."
         },
         {
           title: "Puddles - Slowdown!",
@@ -137,7 +137,7 @@ export const translations = {
         },
         {
           title: "Controles",
-          description: "Escritorio: Arriba/W para acelerar, Abajo/S para frenar, Izquierda/Derecha o A/D para girar.\nMóvil: Usa los botones de flechas en pantalla."
+          description: "Escritorio: Arriba/W para acelerar, Abajo/S para frenar, Izquierda/Derecha o A/D para girar, Espacio para el freno de mano.\nMóvil: botones de flechas y DRIFT para el freno de mano. Si sueltas el acelerador, el carro pierde velocidad como uno de verdad."
         },
         {
           title: "Charcos - ¡Reducción de Velocidad!",
