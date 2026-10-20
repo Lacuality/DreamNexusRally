@@ -290,7 +290,7 @@ function Flags() {
 
 /* ---------- Confetti burst on GO ---------- */
 
-const CONFETTI = 260;
+const CONFETTI = 320;
 const CONFETTI_COLORS = ["#fcd116", "#003893", "#ce1126", "#24a0ce", "#fdc6b5", "#ffffff"];
 
 function Confetti() {
@@ -358,7 +358,7 @@ function Confetti() {
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, CONFETTI]} frustumCulled={false}>
-      <planeGeometry args={[0.16, 0.24]} />
+      <planeGeometry args={[0.45, 0.6]} />
       <meshBasicMaterial side={THREE.DoubleSide} toneMapped={false} />
     </instancedMesh>
   );
