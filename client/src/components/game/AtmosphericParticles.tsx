@@ -52,8 +52,10 @@ export function AtmosphericParticles({ carPositionRef }: { carPositionRef: React
     switch (currentBiome) {
       case "coffee_hills":
         return new THREE.Color(0x8B4513);
-      case "andes_highland":
-        return new THREE.Color(0xE8F4F8);
+      case "jungle":
+        return new THREE.Color(0xC8E06A); // drifting leaf bits
+      case "cocora":
+        return new THREE.Color(0xE8F4F8); // fine mist
       case "pueblo":
         return new THREE.Color(0xFFE5CC);
       default:
@@ -86,7 +88,7 @@ export function AtmosphericParticles({ carPositionRef }: { carPositionRef: React
             -0.015,
             -0.08
           );
-        } else if (currentBiome === "andes_highland") {
+        } else if (currentBiome === "cocora" || currentBiome === "jungle") {
           particle.velocity.set(
             (Math.random() - 0.5) * 0.01,
             -0.02,

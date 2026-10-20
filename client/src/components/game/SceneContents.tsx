@@ -5,6 +5,7 @@ import { StartControlDecor } from "./StartControlDecor";
 import { SponsorBanners } from "./SponsorBanners";
 import { Road } from "./Road";
 import { BiomePropsScene } from "./BiomeProps";
+import { Vegetation } from "./Vegetation";
 import { Car } from "./Car";
 import { Obstacles } from "./Obstacles";
 import { Collectibles } from "./Collectibles";
@@ -67,10 +68,11 @@ export function SceneContents({
         <StartControlDecor />
       </Suspense>
       <Suspense fallback={null}>
-        <SponsorBanners />
+        <SponsorBanners carPositionRef={carPositionRef} />
       </Suspense>
       <Road carPositionRef={carPositionRef} />
       <BiomePropsScene carPositionRef={carPositionRef} />
+      <Vegetation carPositionRef={carPositionRef} />
       <Car
         carPositionRef={carPositionRef}
         carSpeedRef={carSpeedRef}

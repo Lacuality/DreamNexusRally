@@ -1,6 +1,8 @@
 import { create } from "zustand";
 
-export type BiomeType = "coffee_hills" | "andes_highland" | "pueblo";
+import { ZONE_ATMOSPHERE, ZONE_SEQUENCE, zoneAt, type ZoneType } from "@/lib/scenery";
+
+export type BiomeType = ZoneType;
 
 export function lerpColor(color1: string, color2: string, t: number): string {
   const c1 = parseInt(color1.replace("#", ""), 16);
@@ -27,59 +29,37 @@ export function lerpNumber(a: number, b: number, t: number): number {
 
 export interface BiomeConfig {
   name: string;
-  skyColor: string;
+  skyColor: string; // horizon colour, also the background behind everything
+  skyTop: string;
   fogColor: string;
   fogNear: number;
   fogFar: number;
   sunIntensity: number;
   ambientIntensity: number;
-  terrainColor: string;
-  curveMultiplier: number;
-  hillMultiplier: number;
-  transitionDistance: number;
 }
 
-export const BIOME_CONFIGS: Record<BiomeType, BiomeConfig> = {
-  coffee_hills: {
-    name: "Coffee Hills",
-    skyColor: "#0e1b24",
-    fogColor: "#152630",
-    fogNear: 70,
-    fogFar: 190,
-    sunIntensity: 1.35,
-    ambientIntensity: 0.55,
-    terrainColor: "#2b5d3b", // lush green
-    curveMultiplier: 1.0,
-    hillMultiplier: 1.0,
-    transitionDistance: 600,
-  },
-  andes_highland: {
-    name: "Andes Highland",
-    skyColor: "#17212d",
-    fogColor: "#223041",
-    fogNear: 55,
-    fogFar: 160,
-    sunIntensity: 1.05,
-    ambientIntensity: 0.45,
-    terrainColor: "#3b4f63", // bluish slate
-    curveMultiplier: 1.2,
-    hillMultiplier: 1.4,
-    transitionDistance: 700,
-  },
-  pueblo: {
-    name: "Pueblo",
-    skyColor: "#221a16",
-    fogColor: "#2c241f",
-    fogNear: 60,
-    fogFar: 170,
-    sunIntensity: 1.45,
-    ambientIntensity: 0.6,
-    terrainColor: "#5a4a36", // warm earth
-    curveMultiplier: 0.9,
-    hillMultiplier: 0.85,
-    transitionDistance: 500,
-  },
+const ZONE_NAMES: Record<BiomeType, string> = {
+  coffee_hills: "Eje Cafetero",
+  jungle: "Selva",
+  cocora: "Valle de Cocora",
+  pueblo: "Pueblo",
 };
+
+export const BIOME_CONFIGS = Object.fromEntries(
+  ZONE_SEQUENCE.map((zone) => {
+    const a = ZONE_ATMOSPHERE[zone];
+    return [zone, {
+      name: ZONE_NAMES[zone],
+      skyColor: a.skyHorizon,
+      skyTop: a.skyTop,
+      fogColor: a.fog,
+      fogNear: a.fogNear,
+      fogFar: a.fogFar,
+      sunIntensity: a.sun,
+      ambientIntensity: a.ambient,
+    }];
+  }),
+) as Record<BiomeType, BiomeConfig>;
 
 interface BiomeState {
   currentBiome: BiomeType;
@@ -94,12 +74,8 @@ interface BiomeState {
   getPreviousConfig: () => BiomeConfig | null;
 }
 
-const BIOME_SEQUENCE: BiomeType[] = [
-  "coffee_hills",
-  "andes_highland",
-  "pueblo",
-];
-const TRANSITION_DURATION = 0.7; // seconds
+// Sky, fog and light colours ease between zones over this many seconds.
+const TRANSITION_DURATION = 3;
 
 export const useBiome = create<BiomeState>((set, get) => ({
   currentBiome: "coffee_hills",
@@ -112,12 +88,7 @@ export const useBiome = create<BiomeState>((set, get) => ({
     const state = get();
     set({ currentDistance: distance });
 
-    const currentConfig = BIOME_CONFIGS[state.currentBiome];
-    const nextDistance = Math.floor(
-      distance / currentConfig.transitionDistance,
-    );
-    const biomeIndex = nextDistance % BIOME_SEQUENCE.length;
-    const newBiome = BIOME_SEQUENCE[biomeIndex];
+    const newBiome = zoneAt(distance);
 
     if (newBiome !== state.currentBiome) {
       console.log(
