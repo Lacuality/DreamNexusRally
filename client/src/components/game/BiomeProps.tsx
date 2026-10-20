@@ -20,9 +20,9 @@ export function BiomePropsScene({ carPositionRef }: BiomePropsSceneProps) {
 
 /** ----------------- Coffee Hills ----------------- */
 function CoffeeHillsProps({ carPositionRef }: { carPositionRef: React.MutableRefObject<THREE.Vector3> }) {
-  const { scene: coffeePlant } = useGLTF("/models/coffee-plant.glb");
-  const { scene: farmFence } = useGLTF("/models/farm-fence.glb");
-  const { scene: jeepWillys } = useGLTF("/models/jeep-willys.glb");
+  const { scene: coffeePlant } = useGLTF("./models/coffee-plant.glb");
+  const { scene: farmFence } = useGLTF("./models/farm-fence.glb");
+  const { scene: jeepWillys } = useGLTF("./models/jeep-willys.glb");
   const groupRef = useRef<THREE.Group>(null);
   const currentSegment = useRef<number | null>(null);
 
@@ -74,8 +74,8 @@ function CoffeeHillsProps({ carPositionRef }: { carPositionRef: React.MutableRef
 
 /** ----------------- Pueblo ----------------- */
 function PuebloProps({ carPositionRef }: { carPositionRef: React.MutableRefObject<THREE.Vector3> }) {
-  const { scene: puebloHouse } = useGLTF("/models/pueblo-house.glb");
-  const { scene: papelPicado } = useGLTF("/models/papel-picado.glb");
+  const { scene: puebloHouse } = useGLTF("./models/pueblo-house.glb");
+  const { scene: papelPicado } = useGLTF("./models/papel-picado.glb");
   const groupRef = useRef<THREE.Group>(null);
   const currentSegment = useRef<number | null>(null);
 

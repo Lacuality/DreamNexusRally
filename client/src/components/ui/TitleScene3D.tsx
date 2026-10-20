@@ -60,7 +60,7 @@ interface BoardingClock {
 }
 
 function Bunny({ boarding, clock }: { boarding: boolean; clock: React.MutableRefObject<BoardingClock> }) {
-  const { scene } = useGLTF("/pixel-bunny-3d.glb");
+  const { scene } = useGLTF("./pixel-bunny-3d.glb");
   const model = useMemo(() => {
     const m = scene.clone();
     m.traverse((o) => {

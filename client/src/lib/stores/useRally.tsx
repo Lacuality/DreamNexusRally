@@ -1,3 +1,4 @@
+import { submitScore } from "@/lib/leaderboardApi";
 import { create } from "zustand";
 import { storageGet } from "@/lib/safeStorage";
 import { subscribeWithSelector } from "zustand/middleware";
@@ -215,28 +216,13 @@ export const useRally = create<RallyState>()(
         set({ phase: "gameover", currentScore: finalScore, highScore: newHighScore, scoreSubmitted: false });
         
         if (state.playerName && finalScore > 0) {
-          fetch("/api/leaderboard", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              playerName: state.playerName,
-              score: finalScore,
-              distance: Math.floor(state.distance),
-            }),
+          submitScore({
+            playerName: state.playerName,
+            score: finalScore,
+            distance: Math.floor(state.distance),
           })
-            .then(response => {
-              if (response.ok) {
-                return response.json();
-              }
-              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            })
-            .then(data => {
-              console.log("Score submitted:", data);
-              set({ scoreSubmitted: true });
-            })
-            .catch(err => {
-              console.error("Failed to submit score:", err);
-            });
+            .then(() => set({ scoreSubmitted: true }))
+            .catch(err => console.error("Failed to submit score:", err));
         }
       }
     },

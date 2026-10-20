@@ -21,49 +21,49 @@ export class AudioManager {
   }
 
   private initAudio() {
-    this.bgMusic = new Audio("/sounds/background.mp3");
+    this.bgMusic = new Audio("./sounds/background.mp3");
     this.bgMusic.loop = true;
     this.bgMusic.volume = 0.3;
 
-    this.idleSound = new Audio("/sounds/idle.mp3");
+    this.idleSound = new Audio("./sounds/idle.mp3");
     this.idleSound.loop = true;
     this.idleSound.volume = 0.5;
 
-    this.engineSound = new Audio("/sounds/acceleration.mp3");
+    this.engineSound = new Audio("./sounds/acceleration.mp3");
     this.engineSound.loop = true;
     this.engineSound.volume = 0.4;
     this.engineSound.playbackRate = 0.8;
 
-    this.crashSound = new Audio("/sounds/hit.mp3");
+    this.crashSound = new Audio("./sounds/hit.mp3");
     this.crashSound.volume = 0.6;
 
-    this.successSound = new Audio("/sounds/success.mp3");
+    this.successSound = new Audio("./sounds/success.mp3");
     this.successSound.volume = 0.5;
 
-    this.nitroSound = new Audio("/sounds/success.mp3");
+    this.nitroSound = new Audio("./sounds/success.mp3");
     this.nitroSound.volume = 0.6;
     this.nitroSound.playbackRate = 1.3;
 
-    this.shieldSound = new Audio("/sounds/success.mp3");
+    this.shieldSound = new Audio("./sounds/success.mp3");
     this.shieldSound.volume = 0.5;
     this.shieldSound.playbackRate = 0.8;
 
-    this.splashSound = new Audio("/sounds/hit.mp3");
+    this.splashSound = new Audio("./sounds/hit.mp3");
     this.splashSound.volume = 0.4;
     this.splashSound.playbackRate = 1.2;
 
-    this.pickupSound = new Audio("/sounds/success.mp3");
+    this.pickupSound = new Audio("./sounds/success.mp3");
     this.pickupSound.volume = 0.5;
 
-    this.brakeSound = new Audio("/sounds/hit.mp3");
+    this.brakeSound = new Audio("./sounds/hit.mp3");
     this.brakeSound.volume = 0.3;
     this.brakeSound.playbackRate = 0.7;
 
-    this.countdownBeep = new Audio("/sounds/hit.mp3");
+    this.countdownBeep = new Audio("./sounds/hit.mp3");
     this.countdownBeep.volume = 0.7;
     this.countdownBeep.playbackRate = 1.5;
 
-    this.countdownGo = new Audio("/sounds/success.mp3");
+    this.countdownGo = new Audio("./sounds/success.mp3");
     this.countdownGo.volume = 0.8;
   }
 

@@ -224,12 +224,12 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
         }}
       >
         <img
-          src="/pixel-bunny.png"
+          src="./pixel-bunny.png"
           alt="Pixel"
           style={{ width: "40px", height: "40px", objectFit: "contain" }}
         />
         <img
-          src="/dream-nexus-logo.png"
+          src="./dream-nexus-logo.png"
           alt="Dream Nexus"
           style={{ width: "120px", objectFit: "contain" }}
         />

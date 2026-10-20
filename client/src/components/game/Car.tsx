@@ -37,8 +37,8 @@ export function Car({ carPositionRef, carSpeedRef, onCrash, boostCounter = 0, ni
   const rearLeftWheelRef = useRef<THREE.Group>(null);
   const rearRightWheelRef = useRef<THREE.Group>(null);
   
-  const { scene: carScene } = useGLTF("/models/rally-car.glb");
-  const { scene: wheelScene } = useGLTF("/models/rally-wheel.glb");
+  const { scene: carScene } = useGLTF("./models/rally-car.glb");
+  const { scene: wheelScene } = useGLTF("./models/rally-wheel.glb");
   
   const carModel = useMemo(() => {
     const clonedScene = carScene.clone();

@@ -135,7 +135,7 @@ export function GameOverScreen() {
         }}
       >
         <img
-          src="/pixel-bunny.png"
+          src="./pixel-bunny.png"
           alt="Pixel"
           style={{ width: "60px", height: "60px", objectFit: "contain" }}
         />

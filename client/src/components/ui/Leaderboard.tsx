@@ -1,14 +1,8 @@
 import { useEffect, useState } from "react";
 import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useRally } from "@/lib/stores/useRally";
+import { getLeaderboard, type LeaderboardEntry } from "@/lib/leaderboardApi";
 
-interface LeaderboardEntry {
-  id: number;
-  playerName: string;
-  score: number;
-  distance: number;
-  createdAt: string;
-}
 
 export function Leaderboard() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -19,10 +13,7 @@ export function Leaderboard() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/leaderboard");
-      if (!response.ok) throw new Error("Failed to fetch leaderboard");
-      const data = await response.json();
-      setLeaderboard(data);
+      setLeaderboard(await getLeaderboard());
       setError(null);
     } catch (err) {
       console.error("Error fetching leaderboard:", err);
