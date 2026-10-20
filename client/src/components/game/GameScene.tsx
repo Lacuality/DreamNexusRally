@@ -12,6 +12,7 @@ import { PauseMenu } from "../ui/PauseMenu";
 import { MobileControls } from "../ui/MobileControls";
 import { TuningPanel } from "../ui/TuningPanel";
 import { GAME_CONFIG } from "@/lib/constants";
+import { GL_OPTIONS, QUALITY } from "@/lib/quality";
 import { audioManager } from "@/lib/audio";
 import { vibrate } from "@/lib/haptics";
 import { ScorePopups } from "../ui/ScorePopups";
@@ -252,12 +253,9 @@ export function GameScene({ isFullscreen = false, onToggleFullscreen }: GameScen
       <KeyboardControls map={keyMap}>
         <Canvas
           camera={{ position: [0, 4, -8], fov: 60, near: 0.1, far: 220 }}
-          gl={{
-            antialias: true,
-            powerPreference: "high-performance",
-            toneMapping: THREE.ACESFilmicToneMapping,
-          }}
-          shadows={{ type: THREE.PCFSoftShadowMap }}
+          gl={GL_OPTIONS}
+          dpr={QUALITY.dpr}
+          shadows={QUALITY.shadows}
           onCreated={({ gl }) => {
             console.log("[Canvas] WebGL context created");
             gl.domElement.addEventListener('webglcontextlost', (event) => {

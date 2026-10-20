@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { groundY, seededRandom, zoneBlendAt, type ZoneType } from "@/lib/scenery";
+import { QUALITY } from "@/lib/quality";
 
 /**
  * Colombian roadside and hillside plants: Quindío wax palms, jungle trees,
@@ -265,7 +266,7 @@ function layOut(meshes: Record<PlantType, THREE.InstancedMesh>, firstChunk: numb
       const rand = seededRandom(chunk * 7919 + TYPE_SEED[type] * 104729 + 12345);
       const { zone, next, t } = zoneBlendAt(z0 + CHUNK / 2);
       // Near zone borders, mix plant counts from both zones.
-      const count = Math.round(DENSITY[zone][type] * (1 - t) + DENSITY[next][type] * t);
+      const count = Math.round((DENSITY[zone][type] * (1 - t) + DENSITY[next][type] * t) * QUALITY.vegetation);
 
       for (let i = 0; i < count && n < mesh.instanceMatrix.count; i++) {
         const side = rand() < 0.5 ? -1 : 1;

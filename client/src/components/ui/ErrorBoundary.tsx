@@ -46,7 +46,16 @@ export class ErrorBoundary extends Component<Props, State> {
         }}
       >
         <h1 style={{ color: "#24A0CE", fontSize: "28px", margin: 0 }}>Dream Nexus Rally</h1>
-        <p style={{ margin: 0 }}>Something went wrong loading the game. / Algo salió mal al cargar el juego.</p>
+        {/webgl/i.test(detail) ? (
+          <p style={{ margin: 0, maxWidth: "460px", lineHeight: 1.5 }}>
+            Your browser couldn't start the 3D graphics. Close other tabs or apps, then reload.
+            If it keeps happening, open the game in your phone's browser instead.
+            <br />
+            Tu navegador no pudo iniciar los gráficos 3D. Cierra otras pestañas o apps y recarga.
+          </p>
+        ) : (
+          <p style={{ margin: 0 }}>Something went wrong loading the game. / Algo salió mal al cargar el juego.</p>
+        )}
         <button
           onClick={() => window.location.reload()}
           style={{

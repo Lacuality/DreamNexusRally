@@ -12,6 +12,7 @@ import { TyreSmoke } from "../game/TyreEffects";
 import { useBiome } from "@/lib/stores/useBiome";
 import { carTelemetry } from "@/lib/carPhysics";
 import { audioManager } from "@/lib/audio";
+import { GL_OPTIONS, QUALITY, keepContextAlive } from "@/lib/quality";
 
 /**
  * Menu scene: the real start line in the Colombian valley, the rally car on the
@@ -300,7 +301,6 @@ const ORIGIN_REF = { current: new THREE.Vector3(0, 0, 0) };
 
 export function TitleScene3D({ boarding = false, onBoarded = () => {} }: { boarding?: boolean; onBoarded?: () => void }) {
   const clock = useRef<BoardingClock>({ start: null });
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   // Always open the menu in coffee country, wherever the last race ended.
   useEffect(() => {
@@ -314,10 +314,11 @@ export function TitleScene3D({ boarding = false, onBoarded = () => {} }: { board
   return (
     <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
       <Canvas
-        shadows={{ type: THREE.PCFSoftShadowMap }}
-        dpr={isMobile ? [1, 1.5] : [1, 2]}
+        shadows={QUALITY.shadows}
+        dpr={QUALITY.dpr}
         camera={{ position: [6, 2.6, -5], fov: 50, near: 0.1, far: 220 }}
-        gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
+        gl={GL_OPTIONS}
+        onCreated={({ gl }) => keepContextAlive(gl.domElement)}
       >
         <Suspense fallback={null}>
           <Environment carPositionRef={ORIGIN_REF} />
