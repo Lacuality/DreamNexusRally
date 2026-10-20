@@ -1,108 +1,38 @@
-import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { useProgress } from "@react-three/drei";
+import { useTranslation } from "@/lib/i18n/useTranslation";
 
+/**
+ * Loading bar shown while the race scene finishes loading (usually a moment, since
+ * the menu already loaded the car and the start line).
+ */
 export function LoadingScreen() {
-  const { progress, active, item } = useProgress();
+  const { progress, active } = useProgress();
+  const { t } = useTranslation();
+  const pct = Math.round(active ? progress : 100);
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "linear-gradient(135deg, #0E1B24 0%, #1a2832 100%)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 9998,
-      }}
-    >
-      <div style={{ textAlign: "center", maxWidth: "600px", padding: "20px" }}>
-        <div
-          style={{
-            fontSize: "clamp(24px, 5vw, 48px)",
-            fontWeight: "800",
-            color: DREAM_NEXUS_COLORS.cyan,
-            marginBottom: "40px",
-            textShadow: `0 0 20px ${DREAM_NEXUS_COLORS.cyan}`,
-            fontFamily: "monospace",
-            letterSpacing: "0.2em",
-          }}
-        >
-          LOADING START CONTROL
-        </div>
-
-        <div
-          style={{
-            width: "100%",
-            maxWidth: "400px",
-            height: "8px",
-            backgroundColor: "rgba(36, 160, 206, 0.2)",
-            borderRadius: "4px",
-            overflow: "hidden",
-            margin: "0 auto 20px",
-            border: `1px solid ${DREAM_NEXUS_COLORS.cyan}`,
-            boxShadow: `0 0 10px rgba(36, 160, 206, 0.3)`,
-          }}
-        >
-          <div
-            style={{
-              width: `${progress}%`,
-              height: "100%",
-              background: `linear-gradient(90deg, ${DREAM_NEXUS_COLORS.cyan}, ${DREAM_NEXUS_COLORS.white})`,
-              transition: "width 0.3s ease-out",
-              boxShadow: `0 0 10px ${DREAM_NEXUS_COLORS.cyan}`,
-            }}
-          />
-        </div>
-
-        <div
-          style={{
-            marginTop: "30px",
-            fontSize: "clamp(14px, 2.5vw, 18px)",
-            color: DREAM_NEXUS_COLORS.cyan,
-            fontFamily: "monospace",
-            fontWeight: "600",
-            marginBottom: "10px",
-          }}
-        >
-          {Math.round(progress)}%
-        </div>
-
-        <div
-          style={{
-            marginTop: "10px",
-            fontSize: "clamp(12px, 2vw, 14px)",
-            color: DREAM_NEXUS_COLORS.cyan,
-            fontFamily: "monospace",
-            opacity: 0.7,
-            height: "40px",
-          }}
-        >
-          {active ? (item ? `Loading ${item.split('/').pop()}...` : "Loading essential race infrastructure...") : "Ready!"}
-        </div>
+    <div className="dnr-loading-backdrop">
+    <div className="dnr-loading" role="status" aria-live="polite">
+      <style>{LOADING_CSS}</style>
+      <div className="dnr-loading-label">
+        <span>{active ? t.menu.warmingUp : t.menu.ready}</span>
+        <strong>{pct}%</strong>
       </div>
-
-      <style>{`
-        @keyframes loadingPulse {
-          0%, 100% {
-            opacity: 0.5;
-          }
-          50% {
-            opacity: 1;
-          }
-        }
-        @keyframes loadingBarPulse {
-          0%, 100% {
-            opacity: 0.6;
-            transform: scaleX(0.95);
-          }
-          50% {
-            opacity: 1;
-            transform: scaleX(1);
-          }
-        }
-      `}</style>
+      <div className="dnr-loading-track">
+        <div className="dnr-loading-fill" style={{ width: `${pct}%` }} />
+        <div className="dnr-loading-car" style={{ left: `${pct}%` }} aria-hidden="true">🏁</div>
+      </div>
+    </div>
     </div>
   );
 }
+
+const LOADING_CSS = `
+.dnr-loading-backdrop { position: fixed; inset: 0; z-index: 9997; background: radial-gradient(120% 90% at 50% 110%, #163a4c, #0e1b24 70%); }
+.dnr-loading { position: fixed; left: 50%; bottom: max(32px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 9998; width: min(420px, calc(100% - 32px)); padding: 14px 18px 16px; border-radius: 12px; background: rgba(14,27,36,.82); border: 1px solid rgba(36,160,206,.45); box-shadow: 0 16px 40px rgba(0,0,0,.35); font-family: Inter, system-ui, sans-serif; color: #fff; backdrop-filter: blur(6px); }
+.dnr-loading-label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font-weight: 900; font-style: italic; font-size: 18px; }
+.dnr-loading-label strong { font-style: normal; font-size: 14px; color: #fcd116; font-variant-numeric: tabular-nums; }
+.dnr-loading-track { position: relative; height: 8px; border-radius: 4px; background: repeating-linear-gradient(90deg, #1d3340 0 14px, #26404e 14px 28px); }
+.dnr-loading-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #fcd116 0 50%, #003893 50% 75%, #ce1126 75%); background-size: 100% 100%; transition: width .3s ease; }
+.dnr-loading-car { position: absolute; top: -16px; transform: translateX(-50%); font-size: 18px; transition: left .3s ease; }
+`;

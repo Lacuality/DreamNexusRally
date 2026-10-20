@@ -50,9 +50,18 @@ function App() {
     setShowNameInput(true);
   };
 
+  // After the name is set, Pixel climbs into the car on the menu scene; the race
+  // loads once that little cinematic has finished.
+  const [boarding, setBoarding] = useState(false);
+
   const handleNameSubmit = (name: string) => {
     setPlayerName(name);
     setShowNameInput(false);
+    setBoarding(true);
+  };
+
+  const handleBoarded = () => {
+    setBoarding(false);
     startLoading();
   };
   
@@ -60,7 +69,7 @@ function App() {
     <div ref={elementRef} style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       {showLanguageSelection && <LanguageSelectionModal onSelectLanguage={handleLanguageSelect} />}
       {showNameInput && <NameInputScreen onSubmit={handleNameSubmit} initialName={playerName} />}
-      {phase === "menu" && <TitleScreenImmersive isFullscreen={isFullscreen} onToggleFullscreen={toggle} isFullscreenSupported={isSupported} onStartRace={handleStartRace} />}
+      {phase === "menu" && <TitleScreenImmersive isFullscreen={isFullscreen} onToggleFullscreen={toggle} isFullscreenSupported={isSupported} onStartRace={handleStartRace} boarding={boarding} onBoarded={handleBoarded} />}
       {/* One scene for the whole run, so phase changes don't rebuild it */}
       {phase !== "menu" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
       {phase === "loading" && <LoadingScreen />}

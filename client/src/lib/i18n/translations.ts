@@ -9,6 +9,18 @@ export const translations = {
     startRace: "🚀 START RACE",
     startPress: "START — Press Enter",
     howToPlay: "📖 How to Play",
+
+    menu: {
+      tagline: "Pixel the Bunny · Colombia",
+      start: "START RACE",
+      howToPlay: "How to play",
+      best: "Best",
+      leaderboard: "Leaderboard",
+      boarding: "Pixel is getting in…",
+      nameHint: "Your name goes on the leaderboard.",
+      warmingUp: "Warming up the tyres",
+      ready: "Ready!"
+    },
     
     tutorial: {
       skip: "Skip Tutorial",
@@ -124,6 +136,18 @@ export const translations = {
     startRace: "🚀 INICIAR CARRERA",
     startPress: "INICIAR — Presiona Enter",
     howToPlay: "📖 Cómo Jugar",
+
+    menu: {
+      tagline: "Pixel el Conejito · Colombia",
+      start: "¡A CORRER!",
+      howToPlay: "Cómo jugar",
+      best: "Récord",
+      leaderboard: "Clasificación",
+      boarding: "Pixel se sube al carro…",
+      nameHint: "Tu nombre aparecerá en la clasificación.",
+      warmingUp: "Calentando las llantas",
+      ready: "¡Listo!"
+    },
     
     tutorial: {
       skip: "Saltar Tutorial",

@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import "@fontsource/inter/800.css";
+import "@fontsource/inter/900-italic.css";
 import { useRally } from "@/lib/stores/useRally";
-import { DREAM_NEXUS_COLORS } from "@/lib/constants";
 import { TitleScene3D } from "./TitleScene3D";
 import { HolographicPanel } from "./HolographicPanel";
 import { Leaderboard } from "./Leaderboard";
-import { FullscreenButton } from "./FullscreenButton";
 import { audioManager } from "@/lib/audio";
 import { useTranslation } from "@/lib/i18n/useTranslation";
 
@@ -13,14 +13,24 @@ interface TitleScreenImmersiveProps {
   onToggleFullscreen: () => void;
   isFullscreenSupported: boolean;
   onStartRace: () => void;
+  /** True while Pixel is climbing into the car; the menu UI fades away. */
+  boarding?: boolean;
+  onBoarded?: () => void;
 }
 
-export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFullscreenSupported, onStartRace }: TitleScreenImmersiveProps) {
+export function TitleScreenImmersive({
+  isFullscreen,
+  onToggleFullscreen,
+  isFullscreenSupported,
+  onStartRace,
+  boarding = false,
+  onBoarded,
+}: TitleScreenImmersiveProps) {
   const { highScore, loadHighScore, showTutorial } = useRally();
   const [isMobile, setIsMobile] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const musicStartedRef = useRef(false);
-  const { t } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
 
   const handleStartMusic = () => {
     if (!musicStartedRef.current) {
@@ -34,365 +44,170 @@ export function TitleScreenImmersive({ isFullscreen, onToggleFullscreen, isFulls
   }, [loadHighScore]);
 
   useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev || "";
-    };
-  }, []);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    return () => {
       audioManager.stopBackgroundMusic();
       musicStartedRef.current = false;
     };
   }, []);
 
+  const leaderboardOpen = !isMobile || showLeaderboard;
+
   return (
-    <div
-      onClick={handleStartMusic}
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "#000",
-        color: DREAM_NEXUS_COLORS.white,
-        zIndex: 1000,
-        overflow: "hidden",
-      }}
-    >
-      <TitleScene3D />
+    <div className="dnr-menu" onClick={handleStartMusic}>
+      <style>{MENU_CSS}</style>
+      <TitleScene3D boarding={boarding} onBoarded={onBoarded} />
 
-      <FullscreenButton isFullscreen={isFullscreen} onClick={onToggleFullscreen} isSupported={isFullscreenSupported} />
+      <div className={`dnr-menu-ui${boarding ? " is-boarding" : ""}`}>
+        <div className="dnr-scrim-top" />
+        <div className="dnr-scrim-bottom" />
 
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          zIndex: 10,
-          pointerEvents: "none",
-        }}
-      >
-        {isMobile ? (
-          <>
-            {/* Mobile Layout */}
-            {/* Title - Top */}
-            <div style={{ 
-              position: "absolute", 
-              top: "10px", 
-              left: "50%", 
-              transform: "translateX(-50%)", 
-              textAlign: "center",
-              pointerEvents: "none",
-              width: "100%",
-              padding: "0 10px",
-            }}>
-              <img
-                src="/dream-nexus-logo.png"
-                alt="Dream Nexus"
-                style={{
-                  width: "80px",
-                  height: "auto",
-                  display: "block",
-                  margin: "0 auto 4px",
-                  filter: "drop-shadow(0 0 15px rgba(36, 160, 206, 0.5))",
-                  animation: "logoFloat 3s ease-in-out infinite",
-                }}
-              />
-              <h1
-                style={{
-                  fontFamily: "monospace",
-                  fontSize: "20px",
-                  letterSpacing: "0.05em",
-                  color: DREAM_NEXUS_COLORS.cyan,
-                  margin: "0",
-                  textShadow: "0 0 20px rgba(36, 160, 206, 0.6)",
-                  animation: "textGlow 2s ease-in-out infinite alternate",
-                }}
+        {/* Brand */}
+        <header className="dnr-brand">
+          <div className="dnr-brand-kicker">
+            <img src="/dream-nexus-logo.png" alt="" />
+            <span>DREAM NEXUS</span>
+          </div>
+          <h1 className="dnr-brand-title">
+            RALLY<span className="dnr-brand-stripe" aria-hidden="true" />
+          </h1>
+          <p className="dnr-brand-tagline">{t.menu.tagline}</p>
+        </header>
+
+        {/* Top-right controls */}
+        <div className="dnr-top-actions">
+          <div className="dnr-lang" role="group" aria-label="Language">
+            {(["en", "es"] as const).map((lang) => (
+              <button
+                key={lang}
+                className={language === lang ? "is-active" : ""}
+                onClick={() => setLanguage(lang)}
               >
-                DREAM NEXUS RALLY
-              </h1>
-            </div>
-
-            {/* Leaderboard Toggle - Top Right */}
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          {isMobile && (
             <button
-              onClick={() => setShowLeaderboard(!showLeaderboard)}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                width: "44px",
-                height: "44px",
-                background: "rgba(14, 27, 36, 0.8)",
-                backdropFilter: "blur(10px)",
-                border: `2px solid ${DREAM_NEXUS_COLORS.cyan}`,
-                borderRadius: "10px",
-                color: DREAM_NEXUS_COLORS.cyan,
-                fontSize: "18px",
-                cursor: "pointer",
-                pointerEvents: "auto",
-                boxShadow: "0 0 15px rgba(36, 160, 206, 0.3)",
-              }}
+              className={`dnr-icon-btn${showLeaderboard ? " is-active" : ""}`}
+              onClick={() => setShowLeaderboard((v) => !v)}
+              aria-label={t.menu.leaderboard}
             >
               🏆
             </button>
+          )}
+          {isFullscreenSupported && (
+            <button className="dnr-icon-btn" onClick={onToggleFullscreen} aria-label="Fullscreen">
+              {isFullscreen ? "⤡" : "⤢"}
+            </button>
+          )}
+        </div>
 
-            {/* Leaderboard Panel */}
-            {showLeaderboard && (
-              <div style={{ 
-                position: "absolute", 
-                top: "60px", 
-                right: "10px",
-                maxWidth: "90vw",
-                width: "300px",
-                pointerEvents: "auto",
-              }}>
-                <HolographicPanel>
-                  <Leaderboard />
-                </HolographicPanel>
-              </div>
-            )}
-
-            {/* Buttons - Bottom Center */}
-            <div style={{ 
-              position: "absolute", 
-              bottom: "20px", 
-              left: "50%", 
-              transform: "translateX(-50%)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "16px",
-              pointerEvents: "auto",
-              width: "calc(100% - 20px)",
-              maxWidth: "400px",
-            }}>
-              {highScore > 0 && (
-                <div
-                  style={{
-                    fontSize: "16px",
-                    fontFamily: "monospace",
-                    color: DREAM_NEXUS_COLORS.warm,
-                    textAlign: "center",
-                    textShadow: "0 0 10px rgba(253, 198, 181, 0.6)",
-                  }}
-                >
-                  {t.yourHighScore}: {highScore}m
-                </div>
-              )}
-
-              <button
-                onClick={onStartRace}
-                style={{
-                  width: "100%",
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                  fontSize: "20px",
-                  padding: "18px 48px",
-                  background: `linear-gradient(135deg, ${DREAM_NEXUS_COLORS.cyan}, #5dd6ff)`,
-                  color: DREAM_NEXUS_COLORS.navy,
-                  border: `2px solid #5dd6ff`,
-                  borderRadius: "14px",
-                  cursor: "pointer",
-                  boxShadow: "0 0 30px rgba(36, 160, 206, 0.6), 0 10px 25px rgba(0,0,0,0.4)",
-                  transition: "all 0.3s ease",
-                  textShadow: "0 2px 5px rgba(0,0,0,0.3)",
-                }}
-              >
-                {t.startRace}
-              </button>
-
-              <button
-                onClick={showTutorial}
-                style={{
-                  width: "100%",
-                  fontFamily: "monospace",
-                  fontWeight: 600,
-                  fontSize: "16px",
-                  padding: "14px 36px",
-                  background: "rgba(74, 144, 226, 0.3)",
-                  color: DREAM_NEXUS_COLORS.white,
-                  border: "2px solid rgba(74, 144, 226, 0.6)",
-                  borderRadius: "12px",
-                  cursor: "pointer",
-                  boxShadow: "0 0 15px rgba(74, 144, 226, 0.3)",
-                  transition: "all 0.3s ease",
-                }}
-              >
-                {t.howToPlay}
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Desktop Layout */}
-            {/* Title - Top Center */}
-            <div style={{ 
-              position: "absolute", 
-              top: "20px", 
-              left: "50%", 
-              transform: "translateX(-50%)", 
-              textAlign: "center",
-              pointerEvents: "none",
-            }}>
-              <img
-                src="/dream-nexus-logo.png"
-                alt="Dream Nexus"
-                style={{
-                  width: "clamp(120px, 15vw, 180px)",
-                  height: "auto",
-                  display: "block",
-                  margin: "0 auto 8px",
-                  filter: "drop-shadow(0 0 20px rgba(36, 160, 206, 0.5))",
-                  animation: "logoFloat 3s ease-in-out infinite",
-                }}
-              />
-              <h1
-                style={{
-                  fontFamily: "monospace",
-                  fontSize: "clamp(24px, 3.5vw, 40px)",
-                  letterSpacing: "0.05em",
-                  color: DREAM_NEXUS_COLORS.cyan,
-                  margin: "0 0 6px",
-                  textShadow: "0 0 20px rgba(36, 160, 206, 0.6)",
-                  animation: "textGlow 2s ease-in-out infinite alternate",
-                }}
-              >
-                {t.title}
-              </h1>
-              <p
-                style={{
-                  fontSize: "clamp(12px, 1.5vw, 16px)",
-                  color: DREAM_NEXUS_COLORS.warm,
-                  margin: 0,
-                  textShadow: "0 2px 10px rgba(0,0,0,0.5)",
-                }}
-                dangerouslySetInnerHTML={{ __html: t.tagline }}
-              />
-            </div>
-
-            {/* Leaderboard - Top Right */}
-            <div style={{ 
-              position: "absolute", 
-              top: "20px", 
-              right: "20px",
-              maxWidth: "320px",
-              pointerEvents: "auto",
-            }}>
-              <HolographicPanel>
-                <Leaderboard />
-              </HolographicPanel>
-            </div>
-
-            {/* Buttons - Bottom Center */}
-            <div style={{ 
-              position: "absolute", 
-              bottom: "30px", 
-              left: "50%", 
-              transform: "translateX(-50%)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "20px",
-              pointerEvents: "auto",
-              maxWidth: "500px",
-            }}>
-              {highScore > 0 && (
-                <div
-                  style={{
-                    fontSize: "clamp(14px, 1.8vw, 18px)",
-                    fontFamily: "monospace",
-                    color: DREAM_NEXUS_COLORS.warm,
-                    textAlign: "center",
-                    textShadow: "0 0 10px rgba(253, 198, 181, 0.6)",
-                  }}
-                >
-                  {t.yourHighScore}: {highScore}m
-                </div>
-              )}
-
-              <button
-                onClick={onStartRace}
-                style={{
-                  fontFamily: "monospace",
-                  fontWeight: 700,
-                  fontSize: "clamp(18px, 2.5vw, 24px)",
-                  padding: "clamp(14px, 2vw, 18px) clamp(40px, 6vw, 60px)",
-                  background: `linear-gradient(135deg, ${DREAM_NEXUS_COLORS.cyan}, #5dd6ff)`,
-                  color: DREAM_NEXUS_COLORS.navy,
-                  border: `2px solid #5dd6ff`,
-                  borderRadius: "14px",
-                  cursor: "pointer",
-                  boxShadow: "0 0 30px rgba(36, 160, 206, 0.6), 0 10px 25px rgba(0,0,0,0.4)",
-                  transform: "translateZ(0)",
-                  transition: "all 0.3s ease",
-                  textShadow: "0 2px 5px rgba(0,0,0,0.3)",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-3px) scale(1.05)";
-                  e.currentTarget.style.boxShadow = "0 0 40px rgba(36, 160, 206, 0.8), 0 15px 30px rgba(0,0,0,0.5)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0) scale(1)";
-                  e.currentTarget.style.boxShadow = "0 0 30px rgba(36, 160, 206, 0.6), 0 10px 25px rgba(0,0,0,0.4)";
-                }}
-              >
-                {t.startRace}
-              </button>
-
-              <button
-                onClick={showTutorial}
-                style={{
-                  fontFamily: "monospace",
-                  fontWeight: 600,
-                  fontSize: "clamp(14px, 1.8vw, 18px)",
-                  padding: "clamp(12px, 1.6vw, 14px) clamp(30px, 5vw, 40px)",
-                  background: "rgba(74, 144, 226, 0.3)",
-                  color: DREAM_NEXUS_COLORS.white,
-                  border: "2px solid rgba(74, 144, 226, 0.6)",
-                  borderRadius: "12px",
-                  cursor: "pointer",
-                  boxShadow: "0 0 15px rgba(74, 144, 226, 0.3)",
-                  transition: "all 0.3s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "rgba(74, 144, 226, 0.5)";
-                  e.currentTarget.style.boxShadow = "0 0 25px rgba(74, 144, 226, 0.5)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "rgba(74, 144, 226, 0.3)";
-                  e.currentTarget.style.boxShadow = "0 0 15px rgba(74, 144, 226, 0.3)";
-                }}
-              >
-                {t.howToPlay}
-              </button>
-            </div>
-          </>
+        {/* Leaderboard */}
+        {leaderboardOpen && (
+          <aside className={`dnr-board${isMobile ? " is-mobile" : ""}`}>
+            <HolographicPanel>
+              <Leaderboard />
+            </HolographicPanel>
+          </aside>
         )}
+
+        {/* Start */}
+        <div className="dnr-start">
+          {highScore > 0 && (
+            <div className="dnr-best">
+              <span>{t.menu.best}</span>
+              <strong>{highScore.toLocaleString()}</strong>
+            </div>
+          )}
+          <button className="dnr-cta" onClick={onStartRace}>
+            <span className="dnr-cta-label">{t.menu.start}</span>
+            <span className="dnr-cta-chevrons" aria-hidden="true">›››</span>
+          </button>
+          <button className="dnr-secondary" onClick={showTutorial}>
+            {t.menu.howToPlay}
+          </button>
+        </div>
       </div>
 
-      <style>{`
-        @keyframes hologramScan {
-          0% { left: -100%; }
-          100% { left: 100%; }
-        }
-        @keyframes logoFloat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes textGlow {
-          from { text-shadow: 0 0 20px rgba(36, 160, 206, 0.6); }
-          to { text-shadow: 0 0 30px rgba(36, 160, 206, 0.9), 0 0 40px rgba(36, 160, 206, 0.5); }
-        }
-      `}</style>
+      {boarding && <div className="dnr-boarding-caption">{t.menu.boarding}</div>}
     </div>
   );
 }
+
+const MENU_CSS = `
+.dnr-menu {
+  --navy: #0e1b24;
+  --cyan: #24a0ce;
+  --warm: #fdc6b5;
+  --sun: #ffb347;
+  --ink: #ffffff;
+  position: fixed; inset: 0; z-index: 1000; overflow: hidden;
+  background: var(--navy); color: var(--ink);
+  font-family: Inter, system-ui, sans-serif;
+}
+.dnr-menu-ui { position: absolute; inset: 0; z-index: 10; pointer-events: none; transition: opacity .45s ease, transform .45s ease; }
+.dnr-menu-ui.is-boarding { opacity: 0; transform: translateY(12px); }
+.dnr-menu-ui > * { pointer-events: auto; }
+.dnr-menu-ui > .dnr-scrim-top, .dnr-menu-ui > .dnr-scrim-bottom { pointer-events: none; }
+.dnr-scrim-top { position: absolute; inset: 0 0 auto 0; height: 34%; background: linear-gradient(rgba(8,18,26,.55), rgba(8,18,26,0)); }
+.dnr-scrim-bottom { position: absolute; inset: auto 0 0 0; height: 42%; background: linear-gradient(rgba(8,18,26,0), rgba(8,18,26,.7)); }
+
+.dnr-brand { position: absolute; top: max(20px, env(safe-area-inset-top)); left: max(24px, env(safe-area-inset-left)); pointer-events: none; }
+.dnr-brand-kicker { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .32em; font-size: 13px; color: var(--cyan); text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.dnr-brand-kicker img { width: 34px; height: auto; filter: drop-shadow(0 0 10px rgba(36,160,206,.6)); }
+.dnr-brand-title { position: relative; margin: 2px 0 0; font-size: clamp(64px, 10vw, 128px); line-height: .9; font-weight: 900; font-style: italic; letter-spacing: -.02em; color: var(--ink); text-shadow: 0 6px 24px rgba(0,0,0,.35); animation: dnr-in .7s cubic-bezier(.2,.8,.2,1) both; }
+.dnr-brand-stripe { position: absolute; left: 4px; right: -18px; bottom: -10px; height: 10px; transform: skewX(-24deg); background: linear-gradient(90deg, #fcd116 0 50%, #003893 50% 75%, #ce1126 75%); box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.dnr-brand-tagline { margin: 22px 0 0; font-size: 15px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--warm); text-shadow: 0 1px 8px rgba(0,0,0,.45); }
+
+.dnr-top-actions { position: absolute; top: max(18px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); display: flex; gap: 8px; align-items: center; }
+.dnr-lang { display: flex; background: rgba(14,27,36,.72); border: 1px solid rgba(36,160,206,.6); border-radius: 999px; padding: 3px; backdrop-filter: blur(8px); }
+.dnr-lang button { border: 0; background: transparent; color: #cfe6ef; font: 800 12px Inter, sans-serif; letter-spacing: .1em; padding: 8px 12px; border-radius: 999px; cursor: pointer; min-height: 32px; }
+.dnr-lang button.is-active { background: var(--cyan); color: var(--navy); }
+.dnr-icon-btn { width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(36,160,206,.6); background: rgba(14,27,36,.72); color: var(--ink); font-size: 18px; cursor: pointer; backdrop-filter: blur(8px); }
+.dnr-icon-btn.is-active { background: var(--cyan); }
+
+.dnr-board { position: absolute; bottom: max(24px, env(safe-area-inset-bottom)); right: max(20px, env(safe-area-inset-right)); width: min(280px, 28vw); max-height: 44vh; overflow: auto; animation: dnr-in .6s .15s cubic-bezier(.2,.8,.2,1) both; }
+.dnr-board.is-mobile { top: 70px; bottom: auto; left: 16px; right: 16px; width: auto; max-height: 60vh; }
+
+.dnr-start { position: absolute; left: max(24px, env(safe-area-inset-left)); bottom: max(28px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: flex-start; gap: 12px; animation: dnr-in .7s .1s cubic-bezier(.2,.8,.2,1) both; }
+.dnr-best { display: inline-flex; gap: 10px; align-items: baseline; padding: 6px 12px; border-radius: 6px; background: rgba(14,27,36,.7); border-left: 3px solid var(--sun); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #cfe6ef; }
+.dnr-best strong { font-size: 18px; letter-spacing: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.dnr-cta { position: relative; display: inline-flex; align-items: center; gap: 18px; padding: 18px 34px 18px 30px; border: 0; cursor: pointer; transform: skewX(-12deg); background: linear-gradient(100deg, #fcd116, var(--sun) 55%, #ff7a45); color: #1b1206; box-shadow: 0 10px 30px rgba(255,140,60,.45), inset 0 -4px 0 rgba(0,0,0,.18); transition: transform .15s ease, box-shadow .15s ease; }
+.dnr-cta > * { transform: skewX(12deg); }
+.dnr-cta:hover { transform: skewX(-12deg) translateY(-2px); box-shadow: 0 14px 36px rgba(255,140,60,.55), inset 0 -4px 0 rgba(0,0,0,.18); }
+.dnr-cta:active { transform: skewX(-12deg) translateY(1px); }
+.dnr-cta:focus-visible, .dnr-secondary:focus-visible, .dnr-lang button:focus-visible, .dnr-icon-btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+.dnr-cta-label { font-size: 28px; font-weight: 900; font-style: italic; letter-spacing: .02em; }
+.dnr-cta-chevrons { font-size: 30px; font-weight: 900; letter-spacing: -.1em; animation: dnr-chev 1.1s ease-in-out infinite; }
+.dnr-secondary { border: 0; background: none; color: #e6f3f8; font: 800 13px Inter, sans-serif; letter-spacing: .16em; text-transform: uppercase; padding: 8px 2px; cursor: pointer; border-bottom: 2px solid rgba(36,160,206,.8); }
+
+.dnr-boarding-caption { position: absolute; left: 50%; bottom: max(36px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 11; font-weight: 900; font-style: italic; font-size: 20px; letter-spacing: .04em; color: var(--ink); text-shadow: 0 2px 12px rgba(0,0,0,.6); animation: dnr-in .5s .2s both; white-space: nowrap; }
+
+@keyframes dnr-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes dnr-chev { 0%,100% { transform: skewX(12deg) translateX(0); } 50% { transform: skewX(12deg) translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .dnr-brand-title, .dnr-board, .dnr-start, .dnr-boarding-caption, .dnr-cta-chevrons { animation: none; } }
+
+@media (max-width: 767px) {
+  .dnr-brand { left: 16px; top: calc(66px + env(safe-area-inset-top)); }
+  .dnr-brand-title { font-size: 60px; }
+  .dnr-brand-kicker { font-size: 11px; letter-spacing: .26em; }
+  .dnr-brand-kicker img { width: 26px; }
+  .dnr-brand-tagline { font-size: 11px; margin-top: 18px; }
+  .dnr-top-actions { right: 12px; }
+  .dnr-start { left: 16px; right: 16px; align-items: stretch; }
+  .dnr-best { align-self: flex-start; }
+  .dnr-cta { justify-content: center; }
+  .dnr-cta-label { font-size: 24px; }
+  .dnr-secondary { align-self: center; }
+}
+`;
