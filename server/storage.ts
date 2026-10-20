@@ -12,11 +12,15 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
+  private memLeaderboard: Map<string, Leaderboard>;
   currentId: number;
+  currentLeaderboardId: number;
 
   constructor() {
     this.users = new Map();
+    this.memLeaderboard = new Map();
     this.currentId = 1;
+    this.currentLeaderboardId = 1;
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -37,6 +41,11 @@ export class MemStorage implements IStorage {
   }
 
   async getTopLeaderboard(limit: number): Promise<Leaderboard[]> {
+    if (!db) {
+      return Array.from(this.memLeaderboard.values())
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
+    }
     const results = await db
       .select()
       .from(leaderboard)
@@ -46,6 +55,17 @@ export class MemStorage implements IStorage {
   }
 
   async upsertLeaderboardScore(scoreData: InsertLeaderboard): Promise<Leaderboard> {
+    if (!db) {
+      const existing = this.memLeaderboard.get(scoreData.playerName);
+      if (existing && existing.score >= scoreData.score) return existing;
+      const entry: Leaderboard = {
+        id: existing?.id ?? this.currentLeaderboardId++,
+        ...scoreData,
+        createdAt: new Date(),
+      };
+      this.memLeaderboard.set(scoreData.playerName, entry);
+      return entry;
+    }
     const [result] = await db
       .insert(leaderboard)
       .values(scoreData)

@@ -61,26 +61,11 @@ function App() {
       {showLanguageSelection && <LanguageSelectionModal onSelectLanguage={handleLanguageSelect} />}
       {showNameInput && <NameInputScreen onSubmit={handleNameSubmit} initialName={playerName} />}
       {phase === "menu" && <TitleScreenImmersive isFullscreen={isFullscreen} onToggleFullscreen={toggle} isFullscreenSupported={isSupported} onStartRace={handleStartRace} />}
-      {phase === "loading" && (
-        <>
-          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
-          <LoadingScreen />
-        </>
-      )}
-      {phase === "tutorial" && (
-        <>
-          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
-          <Tutorial />
-        </>
-      )}
-      {phase === "playing" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
-      {phase === "paused" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
-      {phase === "gameover" && (
-        <>
-          <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />
-          <GameOverScreen />
-        </>
-      )}
+      {/* One scene for the whole run, so phase changes don't rebuild it */}
+      {phase !== "menu" && <GameScene isFullscreen={isFullscreen} onToggleFullscreen={toggle} />}
+      {phase === "loading" && <LoadingScreen />}
+      {phase === "tutorial" && <Tutorial />}
+      {phase === "gameover" && <GameOverScreen />}
       <CountdownDisplay />
     </div>
   );

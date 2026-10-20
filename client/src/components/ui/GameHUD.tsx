@@ -11,7 +11,7 @@ interface GameHUDProps {
 }
 
 export function GameHUD({ nitroActive = false, shieldActive = false, isFullscreen = false, onToggleFullscreen }: GameHUDProps = {}) {
-  const { distance, speed, highScore, collectiblesCount, currentScore, pause } = useRally();
+  const { distance, speed, highScore, collectiblesCount, pause } = useRally();
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -60,7 +60,7 @@ export function GameHUD({ nitroActive = false, shieldActive = false, isFullscree
           <strong>{t.hud.arequipeJars}:</strong> {collectiblesCount}
         </div>
         <div style={{ marginBottom: "8px", color: DREAM_NEXUS_COLORS.cyan }}>
-          <strong>{t.hud.score}:</strong> {currentScore}
+          <strong>{t.hud.score}:</strong> {Math.floor(distance) + collectiblesCount * 50}
         </div>
         <div style={{ color: DREAM_NEXUS_COLORS.white }}>
           <strong>{t.hud.highScore}:</strong> {highScore}

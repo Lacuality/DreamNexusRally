@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { useGLTF, PerspectiveCamera, Environment as DreiEnvironment, Float, Html } from "@react-three/drei";
+import { useGLTF, PerspectiveCamera, Environment as DreiEnvironment, Lightformer, Float, Html } from "@react-three/drei";
 import { Suspense, useRef, useMemo, useState, useEffect } from "react";
 import * as THREE from "three";
 import { useFrame } from "@react-three/fiber";
@@ -148,7 +148,12 @@ export function TitleScene3D() {
             <meshStandardMaterial color="#0E1B24" roughness={0.8} />
           </mesh>
 
-          <DreiEnvironment preset="sunset" />
+          {/* Built locally so the scene doesn't depend on an outside download */}
+          <DreiEnvironment resolution={256}>
+            <Lightformer intensity={2} color="#FDC6B5" position={[0, 5, -9]} scale={[10, 10, 1]} />
+            <Lightformer intensity={1.5} color="#24A0CE" position={[-5, 1, -1]} rotation-y={Math.PI / 2} scale={[20, 2, 1]} />
+            <Lightformer intensity={1} color="#ffffff" position={[5, 1, -1]} rotation-y={-Math.PI / 2} scale={[20, 2, 1]} />
+          </DreiEnvironment>
           <fog attach="fog" args={["#0E1B24", 5, 15]} />
         </Suspense>
       </Canvas>

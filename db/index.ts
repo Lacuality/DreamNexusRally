@@ -2,17 +2,14 @@ import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
-}
-
 neonConfig.webSocketConstructor = ws;
 neonConfig.pipelineConnect = false;
 
-const pool = new Pool({ 
-  connectionString: process.env.DATABASE_URL
-});
+// Without DATABASE_URL the game still runs; the leaderboard falls back to memory.
+export const db = process.env.DATABASE_URL
+  ? drizzle(new Pool({ connectionString: process.env.DATABASE_URL }))
+  : null;
 
-export const db = drizzle(pool);
+if (!db) {
+  console.warn("DATABASE_URL not set: leaderboard will be kept in memory and reset on restart.");
+}
