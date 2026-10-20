@@ -1,0 +1,2 @@
+0a70cfc64672d512c5b5b6006b5dcb5cf90dbdbd
+Skills copied from https://github.com/gamedev-skills/awesome-gamedev-agent-skills (Apache-2.0) at the commit above.
