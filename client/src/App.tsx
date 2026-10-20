@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { storageGet } from "./lib/safeStorage";
 import { useRally } from "./lib/stores/useRally";
 import { TitleScreenImmersive } from "./components/ui/TitleScreenImmersive";
 import { LoadingScreen } from "./components/ui/LoadingScreen";
@@ -25,7 +26,7 @@ function App() {
     console.log("Dream Nexus Rally initialized. Phase:", phase);
     loadPlayerName();
     
-    const languageSelected = localStorage.getItem('dream-nexus-language');
+    const languageSelected = storageGet('dream-nexus-language');
     if (!languageSelected) {
       setShowLanguageSelection(true);
     }

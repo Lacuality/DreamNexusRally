@@ -3,6 +3,7 @@ import "@fontsource/inter/800.css";
 import "@fontsource/inter/900-italic.css";
 import { useRally } from "@/lib/stores/useRally";
 import { TitleScene3D } from "./TitleScene3D";
+import { ErrorBoundary } from "./ErrorBoundary";
 import { HolographicPanel } from "./HolographicPanel";
 import { Leaderboard } from "./Leaderboard";
 import { audioManager } from "@/lib/audio";
@@ -65,7 +66,10 @@ export function TitleScreenImmersive({
   return (
     <div className="dnr-menu" onClick={handleStartMusic}>
       <style>{MENU_CSS}</style>
-      <TitleScene3D boarding={boarding} onBoarded={onBoarded} />
+      {/* If the 3D menu scene can't load on this device, keep the menu usable. */}
+      <ErrorBoundary fallback={<MenuSceneFallback boarding={boarding} onBoarded={onBoarded} />}>
+        <TitleScene3D boarding={boarding} onBoarded={onBoarded} />
+      </ErrorBoundary>
 
       <div className={`dnr-menu-ui${boarding ? " is-boarding" : ""}`}>
         <div className="dnr-scrim-top" />
@@ -141,6 +145,24 @@ export function TitleScreenImmersive({
 
       {boarding && <div className="dnr-boarding-caption">{t.menu.boarding}</div>}
     </div>
+  );
+}
+
+/** Plain backdrop used when the 3D menu scene fails; still finishes the boarding step. */
+function MenuSceneFallback({ boarding, onBoarded }: { boarding: boolean; onBoarded?: () => void }) {
+  useEffect(() => {
+    if (!boarding) return;
+    const id = setTimeout(() => onBoarded?.(), 600);
+    return () => clearTimeout(id);
+  }, [boarding, onBoarded]);
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        background: "radial-gradient(120% 90% at 70% 100%, #2f7a33, #163a4c 55%, #0e1b24)",
+      }}
+    />
   );
 }
 

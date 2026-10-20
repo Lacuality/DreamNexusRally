@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { storageGet } from "@/lib/safeStorage";
 import { subscribeWithSelector } from "zustand/middleware";
 import { audioManager } from "@/lib/audio";
 
@@ -107,7 +108,7 @@ export const useRally = create<RallyState>()(
     },
     
     finishLoading: () => {
-      const tutorialShown = sessionStorage.getItem("tutorialShown");
+      const tutorialShown = storageGet("tutorialShown", "session");
       console.log("[finishLoading] tutorialShown in sessionStorage:", tutorialShown);
       if (!tutorialShown) {
         console.log("[finishLoading] First time - showing tutorial");

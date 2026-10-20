@@ -1,15 +1,22 @@
 import { Component, type ReactNode } from "react";
 
-interface State {
-  hasError: boolean;
+interface Props {
+  children: ReactNode;
+  /** Shown instead of the full-page error screen (used around optional 3D scenes). */
+  fallback?: ReactNode;
 }
 
-// Shows a friendly screen instead of a blank page if something fails to load.
-export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
-  state: State = { hasError: false };
+interface State {
+  error: Error | null;
+}
 
-  static getDerivedStateFromError(): State {
-    return { hasError: true };
+// Shows a friendly screen instead of a blank page if something fails to load,
+// with the technical message underneath so a screenshot says what went wrong.
+export class ErrorBoundary extends Component<Props, State> {
+  state: State = { error: null };
+
+  static getDerivedStateFromError(error: unknown): State {
+    return { error: error instanceof Error ? error : new Error(String(error)) };
   }
 
   componentDidCatch(error: unknown) {
@@ -17,7 +24,10 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
   }
 
   render() {
-    if (!this.state.hasError) return this.props.children;
+    const { error } = this.state;
+    if (!error) return this.props.children;
+    if (this.props.fallback !== undefined) return this.props.fallback;
+    const detail = `${error.name}: ${error.message}`.slice(0, 300);
     return (
       <div
         style={{
@@ -51,6 +61,18 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, State> {
         >
           Reload / Recargar
         </button>
+        <code
+          style={{
+            maxWidth: "min(560px, 100%)",
+            fontSize: "12px",
+            lineHeight: 1.4,
+            color: "#8fb2bf",
+            wordBreak: "break-word",
+            userSelect: "all",
+          }}
+        >
+          {detail}
+        </code>
       </div>
     );
   }
